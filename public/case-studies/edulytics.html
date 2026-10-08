@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Edulytics — Product Engineering Case Study</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Oswald:wght@400;500;600&family=Roboto:wght@400;500;600;700&family=Roboto+Condensed:wght@700&family=Anton&family=Manrope:wght@500;600&family=JetBrains+Mono:wght@500;600&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/case-studies/footer.css">
 <style>
 :root{
   --cyan:#00e0ea;
@@ -1142,7 +1143,36 @@ html.fx-hover .fx-ring i{box-shadow:0 0 20px #00e0ea77,inset 0 0 12px #00e0ea33}
 [data-node-id="1013:595"]{@property --rotate-transform { syntax: '<angle>'; initial-value: 0rad; inherits: false; } transform: rotate(var(--rotate-transform, 0rad)); animation: kf_1013_595_rotate_0 2s linear, kf_1013_595_translate_0 2s linear; animation-iteration-count: infinite; }
 @keyframes kf_1013_595_rotate_0 { 0% { --rotate-transform: 0rad; } 3.125% { --rotate-transform: 0.196rad; } 6.25% { --rotate-transform: 0.393rad; } 9.375% { --rotate-transform: 0.589rad; } 12.5% { --rotate-transform: 0.785rad; } 15.625% { --rotate-transform: 0.982rad; } 18.75% { --rotate-transform: 1.178rad; } 21.875% { --rotate-transform: 1.374rad; } 25% { --rotate-transform: 1.571rad; } 28.125% { --rotate-transform: 1.767rad; } 31.25% { --rotate-transform: 1.963rad; } 34.375% { --rotate-transform: 2.16rad; } 37.5% { --rotate-transform: 2.356rad; } 40.625% { --rotate-transform: 2.553rad; } 43.75% { --rotate-transform: 2.749rad; } 46.875% { --rotate-transform: 2.945rad; } 50% { --rotate-transform: 3.142rad; } 53.125% { --rotate-transform: 3.338rad; } 56.25% { --rotate-transform: 3.534rad; } 59.375% { --rotate-transform: 3.731rad; } 62.5% { --rotate-transform: 3.927rad; } 65.625% { --rotate-transform: 4.123rad; } 68.75% { --rotate-transform: 4.32rad; } 71.875% { --rotate-transform: 4.516rad; } 75% { --rotate-transform: 4.712rad; } 78.125% { --rotate-transform: 4.909rad; } 81.25% { --rotate-transform: 5.105rad; } 84.375% { --rotate-transform: 5.301rad; } 87.5% { --rotate-transform: 5.498rad; } 90.625% { --rotate-transform: 5.694rad; } 93.75% { --rotate-transform: 5.89rad; } 96.875% { --rotate-transform: 6.087rad; } 100% { --rotate-transform: 6.283rad; } } @keyframes kf_1013_595_translate_0 { 0% { translate: 0px 0px; } 3.125% { translate: 2.397px -1.967px; } 6.25% { translate: 5.131px -3.429px; } 9.375% { translate: 8.098px -4.329px; } 12.5% { translate: 11.184px -4.633px; } 15.625% { translate: 14.27px -4.329px; } 18.75% { translate: 17.237px -3.429px; } 21.875% { translate: 19.972px -1.967px; } 25% { translate: 22.368px 0px; } 28.125% { translate: 24.335px 2.397px; } 31.25% { translate: 25.797px 5.131px; } 34.375% { translate: 26.697px 8.098px; } 37.5% { translate: 27.001px 11.184px; } 40.625% { translate: 26.697px 14.27px; } 43.75% { translate: 25.797px 17.237px; } 46.875% { translate: 24.335px 19.972px; } 50% { translate: 22.368px 22.368px; } 53.125% { translate: 19.972px 24.335px; } 56.25% { translate: 17.237px 25.797px; } 59.375% { translate: 14.27px 26.697px; } 62.5% { translate: 11.184px 27.001px; } 65.625% { translate: 8.098px 26.697px; } 68.75% { translate: 5.131px 25.797px; } 71.875% { translate: 2.397px 24.335px; } 75% { translate: 0px 22.368px; } 78.125% { translate: -1.967px 19.972px; } 81.25% { translate: -3.429px 17.237px; } 84.375% { translate: -4.329px 14.27px; } 87.5% { translate: -4.633px 11.184px; } 90.625% { translate: -4.329px 8.098px; } 93.75% { translate: -3.429px 5.131px; } 96.875% { translate: -1.967px 2.397px; } 100% { translate: 0px 0px; } }
 .fl-big span{color:#08e7c1;text-shadow:none}
+/* Keep decision cards and illustrations static; animate only the accordion height. */
+#dc-stage .dc-row,#dc-stage .dc-row *,#dc-stage .dc-row::before,#dc-stage .dc-row::after,#dc-stage .dc-row *::before,#dc-stage .dc-row *::after{animation:none!important;transition:none!important}
+#dc-stage .dc-row .dc-more{transition:grid-template-rows .45s cubic-bezier(.2,.8,.2,1)!important}
+@media(prefers-reduced-motion:reduce){#dc-stage .dc-row .dc-more{transition:none!important}}
+#dc-stage .dc-row,#dc-stage .dc-card{opacity:1;transform:none}
+#dc-stage .dc-ill,#dc-stage .dc-rule{transform:none!important}
+#dc-stage .dc-card::after{display:none}
+#dc-stage .dc-ico{color:#08e7c1}
+#dc-stage .dc-ico *{stroke-dasharray:none!important;stroke-dashoffset:0!important}
+#dc-stage .dc-ico [stroke]{stroke:currentColor}
+#dc-stage .dc-ico [fill]:not([fill="none"]){fill:currentColor}
+#dc-stage .dc-ct{color:#08e7c1}
+#dc-stage .dc-row.open{background:#080f0d;border-color:#2c574c;box-shadow:0 0 0 1px #08e7c114,0 24px 60px #0006}
+#dc-stage .dc-card{background:radial-gradient(120% 140% at 0% 0%,#0e1b17 0%,#0b1411 100%);border-color:#283f36}
+#dc-stage .dc-card:hover{border-color:#3b6657}
+#dc-stage .dc-cd{color:#b3cfca}
+#dc-stage .dc-row.open .dc-num,#dc-stage .dc-head:hover .dc-num{color:#a9dcd0}
+#dc-stage .dc-head:focus-visible{outline-color:#08e7c1}
+#dc-stage .dc-row.open .dc-btn{border-color:#08e7c1;box-shadow:0 0 18px #08e7c133}
+#dc-stage .dc-btn svg [stroke]{stroke:currentColor}
+#dc-stage .dc-rule{background:#273a36}
 .cl-h{letter-spacing:normal}
+.cl-connection-dot{position:absolute;left:0;top:0;width:5px;height:5px;border-radius:50%;background:#8ffff0;box-shadow:0 0 5px #08e7c180;pointer-events:none;offset-anchor:center;animation:clConnectionDrift 5.6s linear infinite;animation-delay:var(--delay);animation-play-state:paused}
+.cl-motion-running .cl-connection-dot{animation-play-state:running}
+.cl-sending .cl-connection-dot{animation-name:clConnectionSend;animation-duration:1.8s;animation-delay:0s}
+.cl-profile-trigger{all:unset;position:absolute;left:307px;top:252px;width:188px;height:188px;border-radius:50%;box-sizing:border-box;cursor:pointer;z-index:2}
+.cl-profile-trigger:focus-visible{outline:2px solid #8ffff0;outline-offset:5px}
+@keyframes clConnectionDrift{0%,8%{offset-distance:0%;opacity:0}18%{opacity:.75}60%{opacity:.75}70%,100%{offset-distance:100%;opacity:0}}
+@keyframes clConnectionSend{0%{offset-distance:0%;opacity:0}12%{opacity:.9}75%{opacity:.9}90%,100%{offset-distance:100%;opacity:0}}
+@media(prefers-reduced-motion:reduce){.cl-connection-dot{display:none;animation:none!important}}
 .cl-map [data-node-id="1013:830"],.cl-map [data-node-id="1013:834"],.cl-map [data-node-id="1013:838"],.cl-map [data-node-id="1013:842"]{width:100%;min-width:100%;white-space:nowrap}
 @media(prefers-reduced-motion:reduce){[data-node-id]{animation:none!important}}
 </style>
@@ -2273,16 +2303,81 @@ addEventListener('blur',()=>root.classList.remove('fx-down'));
 
 </script>
 <script>
-// Reveal the editable collaboration diagram when it enters the viewport.
+// Subtle connector dots; hovering or focusing Kibria sends all four outward together.
 (() => {
   const stage = document.getElementById('cl-stage');
+  const diagram = stage.querySelector('[data-node-id="1013:793"]');
+  const reducedMotion = matchMedia('(prefers-reduced-motion:reduce)');
+  const paths = [
+    'M401.5 230 L401.5 185',
+    'M284 353.29 L196 342.29',
+    'M517 352.29 L605 341.29',
+    'M401.5 460 L401.5 504',
+  ];
+  paths.forEach((path, index) => {
+    const dot = document.createElement('span');
+    dot.className = 'cl-connection-dot';
+    dot.setAttribute('aria-hidden', 'true');
+    dot.style.offsetPath = `path('${path}')`;
+    dot.style.setProperty('--delay', `${-index * 1.4}s`);
+    diagram.appendChild(dot);
+  });
+  const profile = document.createElement('button');
+  profile.type = 'button';
+  profile.className = 'cl-profile-trigger';
+  profile.setAttribute('aria-label', 'Send connection dots from Kibria to the collaborating teams');
+  diagram.appendChild(profile);
+  let visible = false, hovered = false, focused = false, tapped = false, tapTimer;
+  const syncMotion = () => {
+    diagram.classList.toggle('cl-motion-running', visible && !document.hidden && !reducedMotion.matches);
+    diagram.classList.toggle('cl-sending', hovered || focused || tapped);
+  };
+  profile.addEventListener('pointerenter', event => { if (event.pointerType !== 'touch') { hovered = true; syncMotion(); } });
+  profile.addEventListener('pointerleave', () => { hovered = false; syncMotion(); });
+  profile.addEventListener('focus', () => { focused = true; syncMotion(); });
+  profile.addEventListener('blur', () => { focused = false; syncMotion(); });
+  profile.addEventListener('click', () => {
+    clearTimeout(tapTimer);
+    tapped = true;
+    diagram.classList.remove('cl-sending');
+    void diagram.offsetWidth;
+    syncMotion();
+    tapTimer = setTimeout(() => { tapped = false; syncMotion(); }, 1800);
+  });
+  document.addEventListener('visibilitychange', syncMotion);
+  reducedMotion.addEventListener('change', syncMotion);
   const observer = new IntersectionObserver(entries => {
-    if (entries.some(entry => entry.isIntersecting)) {
-      stage.classList.add('cl-in');
-      observer.disconnect();
-    }
+    visible = entries.some(entry => entry.isIntersecting);
+    if (visible) stage.classList.add('cl-in');
+    syncMotion();
   }, { threshold: 0.1 });
   observer.observe(stage);
+})();
+</script>
+<footer class="ft pre" id="site-footer" aria-label="Footer">
+  <nav class="ft-social" aria-label="Social profiles"><a class="ft-s" href="#" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3.5"></rect><path d="M8 10.5V16.5M8 7.6v.01M11.5 16.5v-6M11.5 13c0-1.6 1-2.6 2.4-2.6s2.3 1 2.3 2.6v3.5"></path></svg></a><a class="ft-s" href="#" aria-label="GitHub" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.56-1.11-4.56-4.94 0-1.09.39-1.99 1.03-2.69-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.03a9.5 9.5 0 0 1 5 0c1.91-1.3 2.75-1.03 2.75-1.03.55 1.38.2 2.4.1 2.65.64.7 1.03 1.6 1.03 2.69 0 3.84-2.34 4.69-4.57 4.93.36.31.68.92.68 1.85v2.75c0 .27.18.58.69.48A10 10 0 0 0 12 2.2z"></path></svg></a><a class="ft-s" href="#" aria-label="Codeforces" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="3.5" y="10" width="4.6" height="9.5" rx="1.1"></rect><rect x="9.7" y="5" width="4.6" height="14.5" rx="1.1"></rect><rect x="15.9" y="12.2" width="4.6" height="7.3" rx="1.1"></rect></svg></a><a class="ft-s" href="#" aria-label="Facebook" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M13.6 21v-7.6h2.6l.4-3h-3v-1.9c0-.9.3-1.5 1.5-1.5h1.6V4.3a21 21 0 0 0-2.3-.1c-2.3 0-3.9 1.4-3.9 4v2.2H7.9v3h2.6V21z"></path></svg></a></nav>
+  <p class="ft-copy">© 2026 Sheikh Md. Kibria | All Rights Reserved</p>
+  <button type="button" class="ft-top" aria-label="Back to top">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5.5 11.5 12 5l6.5 6.5" /></svg>
+  </button>
+</footer>
+<script>
+(() => {
+  const footer = document.getElementById('site-footer');
+  const reducedMotion = matchMedia('(prefers-reduced-motion:reduce)').matches;
+  footer.querySelectorAll('.ft-s[href="#"]').forEach(link => {
+    link.addEventListener('click', event => event.preventDefault());
+  });
+  footer.querySelector('.ft-top').addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: reducedMotion ? 'auto' : 'smooth' });
+    document.querySelector('.case-back')?.focus({ preventScroll: true });
+  });
+  const observer = new IntersectionObserver(entries => {
+    if (!entries.some(entry => entry.isIntersecting)) return;
+    footer.classList.replace('pre', 'in');
+    observer.disconnect();
+  }, { threshold: 0.2 });
+  observer.observe(footer);
 })();
 </script>
 </body>
