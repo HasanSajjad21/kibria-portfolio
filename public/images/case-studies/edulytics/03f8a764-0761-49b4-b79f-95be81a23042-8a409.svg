@@ -1,0 +1,24 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="65.7895" height="106.579" viewBox="0 0 65.7895 106.579" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Import document">
+<path id="Document thickness" d="M53.2832 4.35059L51.9795 83.7939L9.21484 104.529L1.9668 100.905L0.665039 22.7754L46.0479 0.733398L53.2832 4.35059Z" fill="url(#paint0_linear_0_195)" stroke="#6DCABA" stroke-width="1.31579" stroke-linecap="round"/>
+<path id="Document face" d="M51.0434 4.61241C51.1609 4.63188 51.2891 4.69638 51.4272 4.90245C51.5764 5.12507 51.7184 5.49039 51.8198 6.04502C51.9191 6.58819 51.9731 7.27466 51.9741 8.11241L49.3559 82.3116L7.61667 101.774L7.60886 101.777L7.60203 101.78C7.23187 101.964 6.99298 101.989 6.85105 101.966C6.73359 101.946 6.60541 101.882 6.46726 101.676C6.31814 101.453 6.17602 101.088 6.07468 100.533C5.975 99.9878 5.92186 99.2979 5.92136 98.4552L7.22898 22.9718L50.2553 4.81553L50.2749 4.80772L50.2934 4.79795C50.663 4.61421 50.9015 4.58898 51.0434 4.61241Z" fill="url(#paint1_linear_0_195)" stroke="#A2EEE1" stroke-width="1.31579" stroke-linecap="round"/>
+<path id="Document heading" d="M14.4737 34.2105L42.1053 22.3684V26.3158L14.4737 36.8421V34.2105Z" fill="#4BA797"/>
+<path id="Document line" d="M13.1579 53.9474L42.1053 40.7895" stroke="#BDF8EE" stroke-width="1.44737" stroke-linecap="round"/>
+<path id="Document line_2" d="M13.1579 60.5263L36.8421 47.3684" stroke="#308879" stroke-width="1.44737" stroke-linecap="round"/>
+<path id="Document line_3" d="M13.1579 67.1053L42.1053 53.9474" stroke="#308879" stroke-width="1.44737" stroke-linecap="round"/>
+<path id="Document line_4" d="M13.1579 73.6842L36.8421 60.5263" stroke="#BDF8EE" stroke-width="1.44737" stroke-linecap="round"/>
+<path id="Document line_5" d="M13.1579 80.2632L42.1053 67.1053" stroke="#308879" stroke-width="1.44737" stroke-linecap="round"/>
+<path id="Document line_6" d="M13.1579 86.8421L36.8421 73.6842" stroke="#308879" stroke-width="1.44737" stroke-linecap="round"/>
+<path id="Document line_7" d="M13.1579 93.4211L42.1053 80.2632" stroke="#BDF8EE" stroke-width="1.44737" stroke-linecap="round"/>
+</g>
+<defs>
+<linearGradient id="paint0_linear_0_195" x1="0" y1="0" x2="0" y2="105.263" gradientUnits="userSpaceOnUse">
+<stop stop-color="#329181"/>
+<stop offset="1" stop-color="#1A463E"/>
+</linearGradient>
+<linearGradient id="paint1_linear_0_195" x1="5.26316" y1="3.94737" x2="5.26316" y2="102.632" gradientUnits="userSpaceOnUse">
+<stop stop-color="#84EDDB"/>
+<stop offset="1" stop-color="#369A89"/>
+</linearGradient>
+</defs>
+</svg>

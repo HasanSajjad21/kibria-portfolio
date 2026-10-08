@@ -1,0 +1,20 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="15.7895" height="21.0526" viewBox="0 0 15.7895 21.0526" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Conveyor roller" clip-path="url(#clip0_0_172)">
+<path id="Roller housing" d="M7.89453 0.658203C9.82109 0.658203 11.616 1.69729 12.9512 3.47754C14.2865 5.25801 15.1318 7.74819 15.1318 10.5264C15.1318 13.3045 14.2865 15.7947 12.9512 17.5752C11.616 19.3554 9.82107 20.3945 7.89453 20.3945C5.96817 20.3945 4.17399 19.3552 2.83887 17.5752C1.50352 15.7947 0.658214 13.3045 0.658203 10.5264C0.658203 7.74819 1.50352 5.25801 2.83887 3.47754C4.174 1.69752 5.96815 0.658277 7.89453 0.658203Z" fill="url(#paint0_linear_0_172)" stroke="#417C72" stroke-width="1.31579"/>
+<ellipse id="Roller bearing" cx="7.89474" cy="10.5263" rx="3.94737" ry="5.26316" fill="url(#paint1_linear_0_172)"/>
+<ellipse id="Bearing centre" cx="7.89474" cy="10.5263" rx="1.31579" ry="2.63158" fill="#0A3830"/>
+</g>
+<defs>
+<linearGradient id="paint0_linear_0_172" x1="0" y1="0" x2="0" y2="21.0526" gradientUnits="userSpaceOnUse">
+<stop stop-color="#254E47"/>
+<stop offset="1" stop-color="#020F0D"/>
+</linearGradient>
+<linearGradient id="paint1_linear_0_172" x1="3.94737" y1="5.26316" x2="3.94737" y2="15.7895" gradientUnits="userSpaceOnUse">
+<stop stop-color="#6EBDAF"/>
+<stop offset="1" stop-color="#18574C"/>
+</linearGradient>
+<clipPath id="clip0_0_172">
+<rect width="15.7895" height="21.0526" fill="white"/>
+</clipPath>
+</defs>
+</svg>

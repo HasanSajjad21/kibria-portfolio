@@ -1,0 +1,21 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="148.684" height="69.7368" viewBox="0 0 148.684 69.7368" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Isometric platform" clip-path="url(#clip0_0_248)">
+<path id="Platform edge" d="M148.224 41.7846L74.3418 69.2446L0.460938 41.7846V30.9477L74.1689 60.9526L74.3418 61.0239L74.5156 60.9526L148.224 30.9477V41.7846Z" fill="url(#paint0_linear_0_248)" stroke="#224F48" stroke-width="0.921053" stroke-linecap="round"/>
+<path id="Platform surface" d="M147.312 30.2734L74.3418 61.2695L1.37109 30.2725L74.3418 0.567383L147.312 30.2734Z" fill="url(#paint1_linear_0_248)" stroke="#4C7C74" stroke-width="1.05263" stroke-linecap="round"/>
+<path id="Tile divisions" d="M0 30.2632H148.684M74.3421 0V61.8421" stroke="#0A2924" stroke-width="3.28947" stroke-linecap="round"/>
+<path id="Platform seam" d="M74.3421 30.2632V69.7368" stroke="#468E82" stroke-width="0.921053" stroke-linecap="round"/>
+</g>
+<defs>
+<linearGradient id="paint0_linear_0_248" x1="0" y1="30.2632" x2="0" y2="69.7368" gradientUnits="userSpaceOnUse">
+<stop stop-color="#28524B"/>
+<stop offset="1" stop-color="#061E1A"/>
+</linearGradient>
+<linearGradient id="paint1_linear_0_248" x1="0" y1="0" x2="0" y2="61.8421" gradientUnits="userSpaceOnUse">
+<stop stop-color="#457069"/>
+<stop offset="1" stop-color="#143B34"/>
+</linearGradient>
+<clipPath id="clip0_0_248">
+<rect width="148.684" height="69.7368" fill="white"/>
+</clipPath>
+</defs>
+</svg>

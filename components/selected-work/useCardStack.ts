@@ -1,6 +1,7 @@
 'use client';
 
 import { type RefObject, useEffect, useRef } from 'react';
+import { work } from '@/data/work';
 import { clamp, easeInOut as ease, easeOut, lerp, onFontsReady, prefersReducedMotion } from '@/lib/motion';
 import { useLatest } from '@/hooks/useLatest';
 
@@ -29,7 +30,7 @@ export function useCardStack(sectionRef: RefObject<HTMLElement | null>, ready: b
     const stage = sw.querySelector<HTMLElement>('.sw-stage')!;
     const head = sw.querySelector<HTMLElement>('.sw-head')!;
     const pin = sw.querySelector<HTMLElement>('.sw-pin')!;
-    const cards = ['uh', 'ie', 'ed'].map((k) => sw.querySelector<HTMLElement>(`.sw-${k}`)!);
+    const cards = work.map(({ key }) => sw.querySelector<HTMLElement>(`.sw-${key}`)!);
     const mobile = () => window.innerWidth <= 760;
     let sc = 1, target = 0, cur = 0, raf = 0, inView = false;
 

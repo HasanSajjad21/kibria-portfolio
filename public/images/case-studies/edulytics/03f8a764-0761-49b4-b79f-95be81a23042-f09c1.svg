@@ -1,0 +1,16 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="25" height="31.5789" viewBox="0 0 25 31.5789" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Account glyph">
+<ellipse id="Account head" cx="11.8421" cy="6.57895" rx="5.26316" ry="6.57895" fill="url(#paint0_linear_0_95)"/>
+<path id="Account shoulders" d="M0 28.9474C0 19.2982 3.94737 14.4737 11.8421 14.4737C19.7368 14.4737 23.6842 19.7368 23.6842 30.2632L0 28.9474Z" fill="url(#paint1_linear_0_95)"/>
+</g>
+<defs>
+<linearGradient id="paint0_linear_0_95" x1="6.57895" y1="0" x2="6.57895" y2="13.1579" gradientUnits="userSpaceOnUse">
+<stop stop-color="#23FBD7"/>
+<stop offset="1" stop-color="#09C5A5"/>
+</linearGradient>
+<linearGradient id="paint1_linear_0_95" x1="0" y1="14.4737" x2="0" y2="30.2632" gradientUnits="userSpaceOnUse">
+<stop stop-color="#12F0CA"/>
+<stop offset="1" stop-color="#07A187"/>
+</linearGradient>
+</defs>
+</svg>

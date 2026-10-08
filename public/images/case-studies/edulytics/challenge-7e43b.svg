@@ -1,0 +1,19 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="90.9939" height="42.8842" viewBox="0 0 90.9939 42.8842" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Lower plate">
+<path id="Plate thickness" d="M0 20.4793C0 21.1687 0.615517 21.7432 1.84655 22.2028L41.3628 39.4373C44.071 40.816 46.7793 40.816 49.4876 39.4373L89.3731 22.2028C90.3579 21.7432 90.8503 21.1687 90.8503 20.4793V22.8922C90.8503 23.5815 90.3579 24.156 89.3731 24.6156L49.4876 41.8501C46.7793 43.2288 44.071 43.2288 41.3628 41.8501L1.84655 24.6156C0.615517 24.156 0 23.5815 0 22.8922V20.4793Z" fill="url(#paint0_linear_0_96)"/>
+<path id="Plate surface" d="M1.8474 19.1006L41.3636 1.17678C44.0719 -0.201975 46.7802 -0.201975 49.4884 1.17678L89.374 19.1006C91.3436 20.0198 91.3436 21.0539 89.374 22.2029L49.4884 39.4373C46.7802 40.8161 44.0719 40.8161 41.3636 39.4373L1.8474 22.2029C-0.122251 21.0539 -0.122251 20.0198 1.8474 19.1006Z" fill="url(#paint1_linear_0_96)" stroke="#344551" stroke-width="0.28543"/>
+<path id="Front edge highlight" d="M0.739031 21.5135L41.3632 39.782C44.0714 40.931 46.7797 40.931 49.488 39.782L90.4814 21.5135" stroke="#4A6472" stroke-opacity="0.38" stroke-width="0.499503"/>
+</g>
+<defs>
+<linearGradient id="paint0_linear_0_96" x1="0" y1="20.4793" x2="90.8503" y2="20.4793" gradientUnits="userSpaceOnUse">
+<stop stop-color="#445666"/>
+<stop offset="0.5" stop-color="#29414E"/>
+<stop offset="1" stop-color="#101B27"/>
+</linearGradient>
+<linearGradient id="paint1_linear_0_96" x1="0.370162" y1="40.4714" x2="21.2932" y2="-18.2071" gradientUnits="userSpaceOnUse">
+<stop stop-color="#29444F"/>
+<stop offset="0.52" stop-color="#142830"/>
+<stop offset="1" stop-color="#0A141E"/>
+</linearGradient>
+</defs>
+</svg>

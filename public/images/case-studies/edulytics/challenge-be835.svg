@@ -1,0 +1,12 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="91.0966" height="24.6207" viewBox="0 0 91.0966 24.6207" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Upper plate shadow">
+<path id="Vector" d="M45.5483 24.6207C70.7039 24.6207 91.0966 19.1092 91.0966 12.3103C91.0966 5.51153 70.7039 0 45.5483 0C20.3927 0 0 5.51153 0 12.3103C0 19.1092 20.3927 24.6207 45.5483 24.6207Z" fill="url(#paint0_radial_0_92)"/>
+</g>
+<defs>
+<radialGradient id="paint0_radial_0_92" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(45.5483 12.3103) scale(45.5483 12.3103)">
+<stop stop-color="#000B13" stop-opacity="0.9"/>
+<stop offset="0.55" stop-color="#001320" stop-opacity="0.55"/>
+<stop offset="1" stop-color="#001320" stop-opacity="0"/>
+</radialGradient>
+</defs>
+</svg>

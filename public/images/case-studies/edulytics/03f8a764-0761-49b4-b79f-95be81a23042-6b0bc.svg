@@ -1,0 +1,9 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="44" height="45" viewBox="0 0 44 45" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path id="Sync badge" d="M22 0.526367C33.8485 0.526367 43.4736 10.3531 43.4736 22.5C43.4736 34.6469 33.8485 44.4736 22 44.4736C10.1515 44.4736 0.526367 34.6469 0.526367 22.5C0.526367 10.3531 10.1515 0.526367 22 0.526367Z" fill="url(#paint0_linear_0_74)" stroke="#13C8A9" stroke-width="1.05263"/>
+<defs>
+<linearGradient id="paint0_linear_0_74" x1="0" y1="0" x2="0" y2="45" gradientUnits="userSpaceOnUse">
+<stop stop-color="#06A389"/>
+<stop offset="1" stop-color="#096B5A"/>
+</linearGradient>
+</defs>
+</svg>

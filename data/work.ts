@@ -30,15 +30,18 @@ export interface WorkItem {
 
 export const work: WorkItem[] = [
   {
-    key: 'uh',
-    brand: 'United Healthcare',
-    logo: { src: '/images/work/united-healthcare-logo.png', width: 43, height: 48 },
-    heading: ['A clearer digital', '*healthcare experience*'],
+    key: 'ed',
+    brand: 'Edulytics',
+    logo: { src: '/images/work/edulytics-logo.png', width: 51, height: 44 },
+    heading: ['AI-native *school*', '*management* platform'],
     summary:
-      'A unified healthcare experience helping patients discover doctors, access diagnostics, manage bookings and health records, and navigate hospital services across web and mobile.',
-    href: '#selected-work',
+      'A connected school operating system bringing academics, administration, finance, communication, analytics, mobile experiences, and AI-powered workflows into one platform.',
+    href: '/case-studies/edulytics',
+    ctaLabel: 'View the Edulytics case study',
     images: [
-      { src: '/images/work/united-healthcare-mock.webp', alt: 'United Healthcare website and mobile app', kind: 'm1', left: 234, top: 95, width: 906, height: 476 },
+      { src: '/images/work/edulytics-tablet.webp', alt: 'Edulytics timetable dashboard on a tablet', kind: 'm1', left: 447, top: 28, width: 693, height: 568 },
+      { src: '/images/work/edulytics-phone.webp', alt: 'Edulytics mobile app', kind: 'm2', left: 318, top: 177, width: 582, height: 454 },
+      { src: '/images/work/sparkle.png', alt: '', kind: 'sp', left: 541, top: 158, width: 29, height: 31 },
     ],
   },
   {
@@ -54,18 +57,15 @@ export const work: WorkItem[] = [
     ],
   },
   {
-    key: 'ed',
-    brand: 'Edulytics',
-    logo: { src: '/images/work/edulytics-logo.png', width: 51, height: 44 },
-    heading: ['AI-native *school*', '*management* platform'],
+    key: 'uh',
+    brand: 'United Healthcare',
+    logo: { src: '/images/work/united-healthcare-logo.png', width: 43, height: 48 },
+    heading: ['A clearer digital', '*healthcare experience*'],
     summary:
-      'A connected school operating system bringing academics, administration, finance, communication, analytics, mobile experiences, and AI-powered workflows into one platform.',
-    href: '/case-studies/edulytics',
-    ctaLabel: 'View the Edulytics case study',
+      'A unified healthcare experience helping patients discover doctors, access diagnostics, manage bookings and health records, and navigate hospital services across web and mobile.',
+    href: '#selected-work',
     images: [
-      { src: '/images/work/edulytics-tablet.webp', alt: 'Edulytics timetable dashboard on a tablet', kind: 'm1', left: 447, top: 28, width: 693, height: 568 },
-      { src: '/images/work/edulytics-phone.webp', alt: 'Edulytics mobile app', kind: 'm2', left: 318, top: 177, width: 582, height: 454 },
-      { src: '/images/work/sparkle.png', alt: '', kind: 'sp', left: 541, top: 158, width: 29, height: 31 },
+      { src: '/images/work/united-healthcare-mock.webp', alt: 'United Healthcare website and mobile app', kind: 'm1', left: 234, top: 95, width: 906, height: 476 },
     ],
   },
 ];

@@ -1,0 +1,18 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="48.8718" height="84.6971" viewBox="0 0 48.8718 84.6971" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Paper body">
+<path id="Vector" d="M1.39709 19.3598L39.7951 0.359772L48.5718 8.35977V61.3598L9.0767 84.3598L0.3 80.3598V23.3598C0.3 21.3598 0.665696 20.0264 1.39709 19.3598Z" fill="url(#paint0_linear_0_283)" stroke="#B6F5EA" stroke-width="0.6"/>
+<path id="Vector_2" d="M5.78543 21.3598L39.7951 4.35977L45.2806 11.3598V62.3598L6.88252 83.3598L5.78543 21.3598Z" fill="url(#paint1_linear_0_283)" stroke="#B5F2E7" stroke-width="0.55"/>
+<path id="Vector_3" d="M39.7951 4.35977V14.3598L45.2806 11.3598L39.7951 4.35977Z" fill="#7CC4B8" stroke="#CBFAF2" stroke-width="0.5"/>
+</g>
+<defs>
+<linearGradient id="paint0_linear_0_283" x1="0.3" y1="0.359772" x2="48.5718" y2="0.359772" gradientUnits="userSpaceOnUse">
+<stop stop-color="#DCF0ED"/>
+<stop offset="1" stop-color="#66C4B4"/>
+</linearGradient>
+<linearGradient id="paint1_linear_0_283" x1="5.78543" y1="4.35977" x2="61.6253" y2="26.693" gradientUnits="userSpaceOnUse">
+<stop stop-color="#C9F5EE"/>
+<stop offset="0.5" stop-color="#97E5D8"/>
+<stop offset="1" stop-color="#59BFAE"/>
+</linearGradient>
+</defs>
+</svg>

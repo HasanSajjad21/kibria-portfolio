@@ -1,0 +1,16 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="52.6316" height="69.7368" viewBox="0 0 52.6316 69.7368" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Permission shield" clip-path="url(#clip0_0_176)">
+<path id="Shield casing" d="M51.5654 13.7285L47.7178 44.5107C44.3301 54.5983 37.207 62.648 26.2402 68.6514C12.7377 63.476 4.83673 55.0145 2.29785 43.293L1.01367 13.7539L26.3154 1.10352L51.5654 13.7285Z" fill="url(#paint0_linear_0_176)" stroke="#297569" stroke-width="1.97368" stroke-linecap="round"/>
+<path id="Shield inset" d="M40.6474 21.8702L38.1855 37.8721C36.589 43.38 32.704 48.225 26.3359 52.3721C19.0604 47.3765 14.7527 42.0998 13.1416 36.5938L11.9169 21.8985L26.3154 15.8995L40.6474 21.8702Z" fill="#064238" stroke="#05F4CB" stroke-width="2.63158" stroke-linecap="round"/>
+<path id="Permission check" d="M18.4211 34.2105L23.6842 40.7895L32.8947 27.6316" stroke="#8AF8E5" stroke-width="2.36842" stroke-linecap="round"/>
+</g>
+<defs>
+<linearGradient id="paint0_linear_0_176" x1="0" y1="0" x2="0" y2="69.7368" gradientUnits="userSpaceOnUse">
+<stop stop-color="#296056"/>
+<stop offset="1" stop-color="#0A201C"/>
+</linearGradient>
+<clipPath id="clip0_0_176">
+<rect width="52.6316" height="69.7368" fill="white"/>
+</clipPath>
+</defs>
+</svg>

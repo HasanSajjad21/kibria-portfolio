@@ -1,0 +1,37 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="53.9474" height="146.053" viewBox="0 0 53.9474 146.053" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Mobile phone" clip-path="url(#clip0_0_129)">
+<path id="Phone casing" d="M48.043 16.6904L48.0605 16.6982C50.0719 17.4952 51.4857 18.9783 52.3105 21.2246C53.1469 23.5027 53.3802 26.5805 52.9395 30.5098L52.9375 30.5234L52.9365 30.5371L44.8779 134.304L44.876 134.334V134.365C44.876 137.864 44.0906 139.833 42.8584 140.705C41.6454 141.563 39.6493 141.595 36.5752 140.291L0.833008 123.245L11.4365 1.15039L48.043 16.6904Z" fill="url(#paint0_linear_0_129)" stroke="#8BB3AC" stroke-width="1.57895" stroke-linecap="round"/>
+<path id="Phone display" d="M45.7016 22.7912L48.143 26.4533L39.0132 133.418L5.80906 118.094L12.3227 8.66915L45.7016 22.7912Z" fill="url(#paint1_linear_0_129)" stroke="#246157" stroke-width="1.05263" stroke-linecap="round"/>
+<path id="Speaker" d="M22.3684 10.5263L36.8421 17.1053" stroke="#15312C" stroke-width="2.63158" stroke-linecap="round"/>
+<g id="Mobile security" clip-path="url(#clip1_0_129)">
+<path id="Lock body" d="M15.7895 47.3684L31.5789 53.9474L30.2632 61.8421L15.7895 55.2632V47.3684Z" fill="url(#paint2_linear_0_129)"/>
+<path id="Lock shackle" d="M19.7368 48.5935V41.7877C19.7368 38.1579 21.4912 37.2505 25 39.0653C28.5088 40.8802 30.2632 43.6025 30.2632 47.2323V51.3158" stroke="#08EEC7" stroke-width="2.23684" stroke-linecap="round"/>
+</g>
+<path id="Mobile content line" d="M11.8421 76.3158L36.8421 86.8421" stroke="#17554A" stroke-width="1.05263" stroke-linecap="round"/>
+<path id="Mobile content line_2" d="M11.8421 84.2105L30.2632 94.7368" stroke="#329786" stroke-width="1.05263" stroke-linecap="round"/>
+<path id="Mobile content line_3" d="M11.8421 92.1053L36.8421 102.632" stroke="#17554A" stroke-width="1.05263" stroke-linecap="round"/>
+<path id="Mobile content line_4" d="M11.8421 100L30.2632 110.526" stroke="#329786" stroke-width="1.05263" stroke-linecap="round"/>
+<path id="Mobile content line_5" d="M11.8421 107.895L36.8421 118.421" stroke="#17554A" stroke-width="1.05263" stroke-linecap="round"/>
+<path id="Home indicator" d="M19.7368 121.053L31.5789 126.316" stroke="#72A9A0" stroke-width="1.57895" stroke-linecap="round"/>
+</g>
+<defs>
+<linearGradient id="paint0_linear_0_129" x1="0" y1="0" x2="0" y2="142.105" gradientUnits="userSpaceOnUse">
+<stop stop-color="#467870"/>
+<stop offset="1" stop-color="#0F8B76"/>
+</linearGradient>
+<linearGradient id="paint1_linear_0_129" x1="5.26316" y1="7.89474" x2="5.26316" y2="134.211" gradientUnits="userSpaceOnUse">
+<stop stop-color="#0F8B76"/>
+<stop offset="1" stop-color="#061D19"/>
+</linearGradient>
+<linearGradient id="paint2_linear_0_129" x1="15.7895" y1="47.3684" x2="15.7895" y2="61.8421" gradientUnits="userSpaceOnUse">
+<stop stop-color="#18EFCB"/>
+<stop offset="1" stop-color="#06C3A3"/>
+</linearGradient>
+<clipPath id="clip0_0_129">
+<rect width="53.9474" height="146.053" fill="white"/>
+</clipPath>
+<clipPath id="clip1_0_129">
+<rect width="19.7368" height="25" fill="white" transform="translate(15.7895 38.1579)"/>
+</clipPath>
+</defs>
+</svg>

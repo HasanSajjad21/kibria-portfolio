@@ -1,0 +1,13 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="84.8588" height="39.9229" viewBox="0 0 84.8588 39.9229" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Rear roof">
+<path id="Vector" d="M0.272114 31.5955L38.68 1.67782C40.8362 -0.208885 42.9924 -0.208885 45.1487 1.67782L83.1523 30.7869C84.4999 32.1346 84.9042 33.8865 84.3651 36.0428L0.676407 37.2556L0.272114 31.5955Z" fill="url(#paint0_linear_0_89)" stroke="#445462" stroke-width="0.525581"/>
+<path id="Vector_2" d="M0.214829 35.4757L83.095 34.2628V38.71L0.619123 39.9229L0.214829 35.4757Z" fill="#1C2732"/>
+</g>
+<defs>
+<linearGradient id="paint0_linear_0_89" x1="0.272114" y1="0.262791" x2="27.4911" y2="62.3076" gradientUnits="userSpaceOnUse">
+<stop stop-color="#526274"/>
+<stop offset="0.45" stop-color="#354353"/>
+<stop offset="1" stop-color="#182230"/>
+</linearGradient>
+</defs>
+</svg>

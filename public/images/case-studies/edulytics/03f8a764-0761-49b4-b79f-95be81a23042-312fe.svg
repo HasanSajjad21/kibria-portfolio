@@ -1,0 +1,29 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="43.4211" height="56.5789" viewBox="0 0 43.4211 56.5789" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Role panel" clip-path="url(#clip0_0_112)">
+<path id="Panel edge" d="M37.8271 9.56348L41.7109 13.3242V51.1211L35.2383 56.1377L0.394531 44.4521V4.14844L5.50977 0.431641L37.8271 9.56348Z" fill="url(#paint0_linear_0_112)" stroke="#42766D" stroke-width="0.789474" stroke-linecap="round"/>
+<path id="Panel face" d="M36.3027 14.8663L35.0215 54.5646L0.526367 44.3439V4.64463L36.3027 14.8663Z" fill="url(#paint1_linear_0_112)" stroke="#10B195" stroke-width="1.05263" stroke-linecap="round"/>
+<ellipse id="Person head" cx="19.0789" cy="21.7105" rx="4.60526" ry="5.92105" fill="url(#paint2_linear_0_112)"/>
+<path id="Person body" d="M7.89474 42.129C7.89474 32.538 12.2807 29.4864 21.0526 32.974C25.4386 34.7178 27.6316 39.0774 27.6316 46.0526L7.89474 42.129Z" fill="url(#paint3_linear_0_112)"/>
+</g>
+<defs>
+<linearGradient id="paint0_linear_0_112" x1="0" y1="0" x2="0" y2="56.5789" gradientUnits="userSpaceOnUse">
+<stop stop-color="#48847A"/>
+<stop offset="1" stop-color="#0D3A32"/>
+</linearGradient>
+<linearGradient id="paint1_linear_0_112" x1="0" y1="3.94737" x2="0" y2="55.2632" gradientUnits="userSpaceOnUse">
+<stop stop-color="#0C6A5A"/>
+<stop offset="1" stop-color="#072621"/>
+</linearGradient>
+<linearGradient id="paint2_linear_0_112" x1="14.4737" y1="15.7895" x2="14.4737" y2="27.6316" gradientUnits="userSpaceOnUse">
+<stop stop-color="#52F6DB"/>
+<stop offset="1" stop-color="#09D9B6"/>
+</linearGradient>
+<linearGradient id="paint3_linear_0_112" x1="7.89474" y1="31.5789" x2="7.89474" y2="46.0526" gradientUnits="userSpaceOnUse">
+<stop stop-color="#22FFDA"/>
+<stop offset="1" stop-color="#0BC9A9"/>
+</linearGradient>
+<clipPath id="clip0_0_112">
+<rect width="43.4211" height="56.5789" fill="white"/>
+</clipPath>
+</defs>
+</svg>
