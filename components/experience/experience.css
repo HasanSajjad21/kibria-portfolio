@@ -1,0 +1,85 @@
+/* ================= EXPERIENCE =================
+   Layout: centered header, then a 904px content block (1440 comp) with the date column,
+   the vertical timeline at x=250 and the company column from x=343 (logo) / 435 (details). */
+.xp{position:relative;isolation:isolate;overflow-x:clip;overflow-y:visible;background:transparent;color:#F4F4F7;
+  --tl:250px;--lx:343px;padding:80px 16px 80px;min-height:1125px;box-sizing:border-box}
+/* light orbs, matched to the reference: teal behind the first two companies, teal at the left edge,
+   and a faint grey glow low on the left. Each drifts slowly around its own spot. */
+.xp-orb{position:absolute;z-index:-1;border-radius:50%;pointer-events:none;will-change:transform}
+.xp-orb.o1{left:calc(50% + 259.5px - 287px);top:54px;width:574px;height:590px;background:radial-gradient(closest-side,rgba(29,249,212,0.160),rgba(29,249,212,0.140) 20%,rgba(29,249,212,0.096) 40%,rgba(29,249,212,0.048) 60%,rgba(29,249,212,0.013) 80%,rgba(29,249,212,0))}
+.xp-orb.o2{left:-317px;top:397px;width:622px;height:524px;background:radial-gradient(closest-side,rgba(29,249,212,0.135),rgba(29,249,212,0.118) 20%,rgba(29,249,212,0.081) 40%,rgba(29,249,212,0.041) 60%,rgba(29,249,212,0.011) 80%,rgba(29,249,212,0))}
+.xp-head{text-align:center;margin:0 auto;width:100%;display:flex;flex-direction:column;gap:8px}
+.xp-eyebrow{margin:0;font:400 16px/28px var(--font-inter),system-ui,sans-serif;letter-spacing:.13em;text-transform:uppercase;color:#1DF9D4}
+.xp-title{margin:0;white-space:nowrap;font:400 clamp(40px,4.86vw,70px)/1.25 var(--font-oswald),"Arial Narrow",sans-serif;letter-spacing:-.025em;color:#fff;overflow:hidden;padding-bottom:.04em}
+.xp-title span{display:inline-block}
+.xp-list{position:relative;width:min(904px,100%);margin:48px auto 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:44px}
+.xp-row{display:grid;grid-template-columns:var(--lx) 68px minmax(0,482px);column-gap:24px;align-items:start}
+.xp-row.first .xp-det{gap:12px}
+.xp-date{grid-column:1;font:400 26px/1.5 var(--font-oswald),"Arial Narrow",sans-serif;letter-spacing:1px;color:#B5B3BD;white-space:nowrap;margin:0;
+  margin-right:calc(var(--lx) - var(--tl) + 24px)}
+.xp-logo{grid-column:2;width:68px;height:68px;display:block;border-radius:16px}
+.xp-row.first .xp-logo{border-radius:0}
+.xp-det{grid-column:3;display:flex;flex-direction:column;gap:8px;min-width:0}
+.xp-co{margin:0;font:400 36px/normal var(--font-oswald),"Arial Narrow",sans-serif;letter-spacing:1px;color:#F4F4F7;transition:color .45s cubic-bezier(.2,.7,.2,1)}
+.xp-role{margin:0;font:400 20px/1.25 var(--font-inter),system-ui,sans-serif;color:#F4F4F7}
+.xp-focus{margin:0;font:400 16px/1.3 var(--font-inter),system-ui,sans-serif;color:#94929C}
+.xp-row.on .xp-co{color:#1DF9D4}
+.xp-row.pulse .xp-det{animation:xpPulse .55s cubic-bezier(.2,.7,.2,1)}
+@keyframes xpPulse{from{opacity:.7;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* timeline spine */
+.xp-line{position:absolute;left:var(--tl);top:0;bottom:0;width:0;pointer-events:none}
+.xp-track{position:absolute;left:-2px;width:4px;border-radius:2px;background:#303338;transform-origin:top}
+.xp-fillwrap{position:absolute;left:-14px;width:28px;overflow:hidden}
+.xp-fill{position:absolute;left:11px;top:0;width:6px;height:100%;border-radius:3px;background:#1DF9D4;box-shadow:0 0 8px rgba(29,249,212,.3);
+  transform:translate3d(0,-100%,0);will-change:transform}
+.xp-mk{position:absolute;left:-16px;width:32px;height:32px;margin-top:-16px;display:grid;place-items:center}
+.xp-mk::before{content:"";position:absolute;inset:0;border-radius:50%;background:rgba(0,222,81,.2);opacity:0;transform:scale(.6);
+  transition:opacity .4s cubic-bezier(.2,.7,.2,1),transform .4s cubic-bezier(.2,.7,.2,1)}
+.xp-mk i{position:relative;width:16px;height:16px;border-radius:50%;background:#383C45;display:grid;place-items:center;
+  transition:background-color .4s cubic-bezier(.2,.7,.2,1),transform .4s cubic-bezier(.2,.7,.2,1),box-shadow .4s}
+.xp-mk i::after{content:"";width:8px;height:8px;border-radius:50%;background:#B5BACA;transition:background-color .4s}
+.xp-mk.on::before{opacity:1;transform:scale(1)}
+.xp-mk.on i{background:#1DF9D4;transform:scale(1.1);box-shadow:0 0 8px rgba(29,249,212,.3)}
+.xp-mk.on i::after{background:#fff}
+
+/* entrance (added by script only when it can play it) */
+.xp.pre .xp-eyebrow,.xp.pre .xp-title span,.xp.pre .xp-track,.xp.pre .xp-mk,.xp.pre .xp-row{opacity:0}
+.xp.pre .xp-title span{opacity:1;transform:translateY(105%)}
+.xp.in .xp-eyebrow{animation:track 1.1s var(--ease-out) both}
+.xp.in .xp-title span{animation:rise 1.05s var(--ease-out) .15s both}
+.xp.in .xp-track{animation:xpTrack 1.1s var(--ease-io) .45s both}
+.xp.in .xp-mk{animation:xpFade .5s var(--ease-out) both;animation-delay:calc(.75s + var(--i)*.12s)}
+.xp.in .xp-mk.first{animation:pop .6s cubic-bezier(.34,1.56,.64,1) .7s both}
+.xp.in .xp-row{animation:xpRow .8s var(--ease-out) both;animation-delay:calc(.75s + var(--i)*.12s)}
+@keyframes xpTrack{from{opacity:0;transform:scaleY(0)}to{opacity:1;transform:scaleY(1)}}
+@keyframes xpRow{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.xp-orb.o1{animation:xpOrb1 26s ease-in-out infinite}
+.xp-orb.o2{animation:xpOrb2 32s ease-in-out infinite}
+
+@media (max-width:1100px){
+  .xp{--tl:190px;--lx:240px;min-height:0}
+  .xp-title{font-size:58px}
+}
+@media (max-width:760px){
+  .xp{--tl:7px;padding:56px 16px 64px}
+  .xp-title{font-size:44px;line-height:1.3;letter-spacing:-1px}
+  .xp-eyebrow{font-size:14px;line-height:24px}
+  .xp-list{margin-top:32px;gap:36px;padding-left:36px}
+  .xp-line{left:7px}
+  .xp-row{grid-template-columns:52px minmax(0,1fr);column-gap:14px;row-gap:10px}
+  .xp-date{grid-column:1 / -1;margin:0;font-size:20px;line-height:1.4}
+  .xp-logo{grid-column:1;width:52px;height:52px;border-radius:12px}
+  .xp-det{grid-column:2}
+  .xp-co{font-size:28px}
+  .xp-role{font-size:17px}.xp-focus{font-size:14px}
+  .xp-orb.o1{width:340px;height:340px;left:auto;right:-110px;top:180px}
+  .xp-orb.o2{width:380px;height:340px;left:-230px}
+}
+@media (prefers-reduced-motion:reduce){
+  .xp-orb{animation:none!important}
+  .xp.in *{animation-duration:.01ms!important;animation-delay:0s!important}
+  .xp-row.pulse .xp-det{animation:none}
+  .xp-mk.on i{transform:none}
+  .xp-mk::before,.xp-mk i,.xp-co{transition:none}
+}

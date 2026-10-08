@@ -1,0 +1,2014 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Why ClickHouse for Analytics? — Engineering Story</title>
+<meta name="description" content="Engineering story: separating operational and analytical workloads with MySQL, ClickHouse and FastAPI.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Oswald:wght@400;500;600&family=Chakra+Petch:wght@500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; background: #141414; -webkit-font-smoothing: antialiased; }
+
+/* ===================== topbar ===================== */
+#scope-topbar {--mint: #21E9C8; --ease: cubic-bezier(.2, .7, .2, 1);}
+#scope-topbar .tb {position: absolute; z-index: 100; top: 0; left: 0; right: 0;
+  font-family: "Inter", system-ui, sans-serif;
+  pointer-events: none;}
+#scope-topbar .tb__back {pointer-events: auto;}
+#scope-topbar .tb__inner {display: flex; align-items: center;
+  height: 72px; padding: 0 48px;}
+#scope-topbar .tb__back {justify-self: start;
+  display: inline-flex; align-items: center; gap: 10px;
+  height: 40px; padding: 0 16px 0 6px; border-radius: 999px;
+  background: rgba(26, 29, 32, .55); border: 1px solid rgba(255, 255, 255, .12);
+  color: #E8EEEC; text-decoration: none; font-size: 14px; font-weight: 500; letter-spacing: .01em;
+  opacity: 0; transform: translateX(-12px);
+  transition: border-color 300ms ease, background-color 300ms ease, color 300ms ease, box-shadow 300ms ease;}
+#scope-topbar .tb.is-in .tb__back {opacity: 1; transform: none; transition: opacity 600ms ease 200ms, transform 700ms var(--ease) 200ms, border-color 300ms ease, background-color 300ms ease, color 300ms ease, box-shadow 300ms ease;}
+#scope-topbar .tb__arrow {display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%;
+  background: rgba(33, 233, 200, .12); color: var(--mint);
+  transition: background-color 300ms ease, color 300ms ease;}
+#scope-topbar .tb__arrow svg {width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; transition: transform 350ms var(--ease);}
+#scope-topbar .tb__back:hover, #scope-topbar .tb__back:focus-visible {color: #fff; border-color: rgba(33, 233, 200, .5); background: rgba(26, 29, 32, .85);
+  box-shadow: 0 6px 22px -10px rgba(33, 233, 200, .6); outline: none;}
+#scope-topbar .tb__back:hover .tb__arrow, #scope-topbar .tb__back:focus-visible .tb__arrow {background: var(--mint); color: #0B1A17;}
+#scope-topbar .tb__back:hover .tb__arrow svg {transform: translateX(-3px);}
+@media (max-width: 760px) {
+#scope-topbar .tb__inner {height: 60px; padding: 0 16px;}
+#scope-topbar .tb__back {height: 38px;}
+}
+@media (prefers-reduced-motion: reduce) {
+#scope-topbar .tb, #scope-topbar .tb * {transition-duration: 1ms !important; transition-delay: 0ms !important;}
+}
+/* ===================== hero ===================== */
+#scope-hero {--bg: #141414;
+  --mint: #21E9C8;
+  --pill: #0F8B76;
+  --sub: #C9D3D0;
+  --ease: cubic-bezier(.2, .7, .2, 1);}
+#scope-hero .hero {position: relative; overflow: hidden; isolation: isolate;
+  padding: 120px 80px;
+  text-align: center; color: #fff;
+  font-family: "Inter", system-ui, sans-serif;
+  background: var(--bg);}
+#scope-hero .hero__bg {position: absolute; inset: 0; z-index: -3; overflow: hidden;}
+#scope-hero .hero__img {position: absolute; inset: -40px -24px; 
+  background-size: cover; background-position: center 42%;
+  opacity: 0; transform: scale(1.12);
+  will-change: transform;}
+#scope-hero .hero.is-in .hero__img {opacity: 1; transform: scale(1) translate3d(var(--bx, 0px), var(--by, 0px), 0); transition: opacity 1200ms ease, transform 2600ms var(--ease);}
+#scope-hero .hero.is-ready .hero__img {transition: transform 900ms var(--ease);}
+#scope-hero .hero__spot {position: absolute; z-index: -2; left: 0; top: 0; width: 520px; height: 520px; margin: -260px 0 0 -260px;
+  border-radius: 50%; pointer-events: none;
+  background: radial-gradient(closest-side, rgba(33, 233, 200, .13), rgba(33, 233, 200, 0));
+  opacity: 0; transition: opacity 500ms ease;}
+#scope-hero .hero:hover .hero__spot {opacity: 1;}
+#scope-hero .hero__fade {position: absolute; z-index: -1; left: 0; right: 0; bottom: 0; height: 107px; background: linear-gradient(180deg, rgba(20, 20, 20, 0), var(--bg));}
+#scope-hero .hero__content {display: flex; flex-direction: column; align-items: center; gap: 48px; will-change: transform, opacity;}
+#scope-hero .hero__pill {position: relative; overflow: hidden;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 8px 31px; border-radius: 999px; background: var(--pill);
+  font-family: "Oswald", sans-serif; font-weight: 500; font-size: 32px; line-height: 1.48; text-transform: uppercase;
+  opacity: 0; transform: translateY(-16px) scale(.92);}
+#scope-hero .hero.is-in .hero__pill {opacity: 1; transform: none; transition: opacity 600ms ease 150ms, transform 800ms cubic-bezier(.34, 1.5, .64, 1) 150ms;}
+#scope-hero .hero__logo {width: 36px; height: 36px; flex: none; transform: rotate(-90deg) scale(.6); opacity: 0;}
+#scope-hero .hero.is-in .hero__logo {transform: none; opacity: 1; transition: transform 900ms cubic-bezier(.34, 1.5, .64, 1) 450ms, opacity 500ms ease 450ms;}
+#scope-hero .hero__pill::after {content: ""; position: absolute; top: 0; bottom: 0; left: -60%; width: 45%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .35), transparent);
+  transform: skewX(-18deg); opacity: 0;}
+#scope-hero .hero.is-ready .hero__logo {width: 36px; height: 36px; flex: none; transform: rotate(-90deg) scale(.6); opacity: 0;}
+#scope-hero .hero.is-in .hero__logo {transform: none; opacity: 1; transition: transform 900ms cubic-bezier(.34, 1.5, .64, 1) 450ms, opacity 500ms ease 450ms;}
+#scope-hero .hero__pill::after {animation: sweep 6s ease-in-out 400ms infinite;}
+@keyframes sweep { 0% { left: -60%; opacity: 0; } 8% { opacity: 1; } 22% { left: 120%; opacity: 0; } 100% { left: 120%; opacity: 0; } }
+#scope-hero .hero__text {width: 100%; max-width: 1091px; display: flex; flex-direction: column; align-items: center; gap: 40px;}
+#scope-hero .hero__title {margin: 0;
+  font-family: "Oswald", sans-serif; font-weight: 500;
+  font-size: clamp(44px, 5.6vw, 80px); line-height: 1.05; text-transform: uppercase; letter-spacing: 0;}
+#scope-hero .hero__title .w {display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: .06em; margin-bottom: -.06em;}
+#scope-hero .hero__title .w > span {display: inline-block; transform: translateY(105%);}
+#scope-hero .hero.is-in .hero__title .w > span {transform: none; transition: transform 900ms var(--ease) var(--d);}
+#scope-hero .hero__sub {margin: 0; font-size: clamp(20px, 2.2vw, 32px); line-height: 1.22; color: var(--sub);}
+#scope-hero .hero__sub-a {opacity: 0; transition: opacity 800ms ease 900ms;}
+#scope-hero .hero.is-in .hero__sub-a {opacity: 1;}
+#scope-hero .hero__sub-b {position: relative; display: inline-block; color: var(--mint);
+  clip-path: inset(0 100% 0 0);}
+#scope-hero .hero.is-in .hero__sub-b {clip-path: inset(0 0 0 0); transition: clip-path 1100ms var(--ease) 1350ms;}
+#scope-hero .hero__sub-b::after {content: ""; position: absolute; left: 0; right: 0; bottom: -.18em; height: 2px; border-radius: 2px;
+  background: linear-gradient(90deg, var(--mint), rgba(33, 233, 200, 0));
+  box-shadow: 0 0 12px rgba(33, 233, 200, .6);
+  transform: scaleX(0); transform-origin: left;}
+#scope-hero .hero.is-in .hero__sub-b::after {transform: scaleX(1); transition: transform 900ms var(--ease) 2300ms;}
+#scope-hero .hero.is-ready .hero__sub-b {text-shadow: 0 0 22px rgba(33, 233, 200, .25); transition: text-shadow 800ms ease;}
+@media (max-width: 760px) {
+#scope-hero .hero {padding: 88px 24px 96px;}
+#scope-hero .hero__content {gap: 32px;}
+#scope-hero .hero__pill {font-size: 22px; padding: 6px 22px; gap: 6px;}
+#scope-hero .hero__logo {width: 26px; height: 26px;}
+#scope-hero .hero__text {gap: 24px;}
+}
+@media (prefers-reduced-motion: reduce) {
+#scope-hero .hero *, #scope-hero .hero *::before, #scope-hero .hero *::after {animation: none !important; transition-duration: 1ms !important; transition-delay: 0ms !important;}
+}
+/* ===================== problem ===================== */
+#scope-problem {--bg: #141414;
+  --text: #E8EEEC;
+  --ease: cubic-bezier(.2, .7, .2, 1);}
+#scope-problem .pb {position: relative; overflow: hidden; isolation: isolate;
+  min-height: 444px; padding: 80px;
+  background: var(--bg); color: #fff;
+  font-family: "Inter", system-ui, sans-serif;
+  display: flex; justify-content: center;}
+#scope-problem .pb__knot {position: absolute; z-index: -1; left: 50%; top: 0; width: 789px; max-width: 100%; height: 444px;
+  margin-left: -394.5px; pointer-events: none;
+  opacity: 0; transform: translateY(30px) scale(.94);}
+#scope-problem .pb.is-in .pb__knot {opacity: 1; transform: none; transition: opacity 1400ms ease, transform 1600ms var(--ease);}
+#scope-problem .pb__knot img {display: block; width: 100%; height: 100%; object-fit: cover;
+  transform: translate3d(var(--kx, 0px), var(--ky, 0px), 0);
+  transition: transform 700ms var(--ease);
+  
+  -webkit-mask-image: radial-gradient(ellipse 62% 70% at 50% 45%, #000 55%, transparent 100%);
+          mask-image: radial-gradient(ellipse 62% 70% at 50% 45%, #000 55%, transparent 100%);}
+#scope-problem .pb.is-ready .pb__knot {animation: drift 14s ease-in-out infinite alternate;}
+@keyframes drift { 
+  0% { transform: none; }
+  50% { transform: rotate(2.5deg) scale(1.045); }
+  100% { transform: rotate(-2deg) scale(1.02); }
+}
+#scope-problem .pb__inner {width: 100%; max-width: 1032px; display: flex; flex-direction: column; align-items: center; gap: 48px; text-align: center;}
+#scope-problem .pb__title {margin: 0;
+  font-family: "Oswald", sans-serif; font-weight: 400;
+  font-size: clamp(52px, 5.6vw, 80px); line-height: 1.48; letter-spacing: -2px; text-transform: uppercase;
+  opacity: 0; transform: translateY(24px); filter: blur(6px);}
+#scope-problem .pb.is-in .pb__title {opacity: 1; transform: none; filter: none; transition: opacity 800ms ease 200ms, transform 900ms var(--ease) 200ms, filter 900ms ease 200ms;}
+#scope-problem .pb__text {margin: 0; max-width: 1032px;
+  font-weight: 300; font-size: clamp(18px, 1.7vw, 24px); line-height: 1.62; letter-spacing: -.01em; color: var(--text);}
+#scope-problem .pb__text .w {opacity: .18; transition: opacity 260ms ease, color 260ms ease;}
+#scope-problem .pb__text .w.on {opacity: 1;}
+@media (max-width: 860px) {
+#scope-problem .pb {padding: 72px 24px; min-height: 0;}
+#scope-problem .pb__knot {width: 120%; margin-left: -60%; height: 100%;}
+#scope-problem .pb__inner {gap: 28px;}
+}
+@media (prefers-reduced-motion: reduce) {
+#scope-problem .pb *, #scope-problem .pb *::before, #scope-problem .pb *::after {animation: none !important; transition-duration: 1ms !important; transition-delay: 0ms !important;}
+#scope-problem .pb__text .w {opacity: 1;}
+}
+/* ===================== constraint ===================== */
+#scope-constraint {--bg: #141414;
+    --cyan: #21E9C8;
+    --cyan-hi: #40FEDD;
+    --caption: #CDCDCD;
+    --ease: cubic-bezier(.2, .7, .2, 1);
+    --spring: cubic-bezier(.34, 1.45, .64, 1);}
+#scope-constraint *, #scope-constraint *::before, #scope-constraint *::after {box-sizing: border-box;}
+#scope-constraint .ct {background: var(--bg); color: #fff;
+    padding: 80px;
+    font-family: "Inter", system-ui, sans-serif;
+    overflow: hidden;}
+#scope-constraint .ct__title {margin: 0; text-align: center;
+    font-family: "Oswald", sans-serif; font-weight: 400;
+    font-size: clamp(52px, 5.6vw, 80px); line-height: 1.48; letter-spacing: -2px; color: #fff;
+    text-transform: capitalize;
+    opacity: 0; transform: translateY(24px);}
+#scope-constraint .ct.is-visible .ct__title {opacity: 1; transform: none; transition: opacity 700ms var(--ease), transform 800ms var(--ease);}
+#scope-constraint .ct__stage {position: relative; width: 100%; max-width: 814px; margin: 48px auto 0;
+    aspect-ratio: 814 / 463;
+    container-type: inline-size;
+    perspective: 1600px;}
+#scope-constraint .ct__tilt {position: absolute; inset: 0; transform-style: preserve-3d; will-change: transform;}
+#scope-constraint .ct__stage * {--k: calc(100cqw / 814);}
+#scope-constraint .ct__svg {position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible;}
+#scope-constraint .disc {cursor: pointer; outline: none;}
+#scope-constraint .disc__move {transform-box: view-box; opacity: 0; transform: translateX(var(--from)) scale(.86); transform-origin: var(--ox) 174px;}
+#scope-constraint .ct.is-visible .disc__move {opacity: 1; transform: none; transition: opacity 600ms ease var(--d), transform 1100ms var(--spring) var(--d);}
+#scope-constraint .disc__body {transition: filter 450ms ease, opacity 450ms ease;}
+#scope-constraint .disc__stroke {fill: none; stroke: #155247; stroke-width: 1;}
+#scope-constraint .disc__ring {fill: none; stroke: var(--cyan-hi); stroke-width: 1.5; opacity: 0; filter: drop-shadow(0 0 6px rgba(64, 254, 221, .75)); transition: opacity 450ms ease;}
+#scope-constraint .disc__sheen {opacity: 0; transition: opacity 500ms ease;}
+#scope-constraint .ct__stage:hover .disc__sheen {opacity: 1;}
+#scope-constraint .lens {opacity: 0; transition: opacity 450ms ease;}
+#scope-constraint .ct.is-visible .lens {opacity: .9; transition: opacity 800ms ease var(--d);}
+#scope-constraint .lens__drift {animation: none;}
+#scope-constraint .ct.is-ready .lens__drift {animation: drift 2.2s linear infinite;}
+@keyframes drift { to { transform: translate(-3px, 7.42px); } }
+#scope-constraint .leader {stroke: #373737; stroke-width: .8; stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke 350ms ease;}
+#scope-constraint .ct.is-visible .leader {stroke-dashoffset: 0; transition: stroke-dashoffset 600ms var(--ease) var(--d), stroke 350ms ease;}
+#scope-constraint .tip {fill: #8F8F8F; transform-box: fill-box; transform-origin: center; transform: scale(0); transition: fill 350ms ease;}
+#scope-constraint .ct.is-visible .tip {transform: scale(1); transition: transform 500ms var(--spring) var(--d), fill 350ms ease;}
+#scope-constraint .lbl {position: absolute;
+    left: calc(var(--x) * var(--k)); top: calc(var(--y) * var(--k)); width: calc(var(--w) * var(--k));
+    display: flex; flex-direction: column; align-items: flex-start; gap: calc(4 * var(--k));
+    text-align: left; pointer-events: none;
+    opacity: 0; transform: translateY(calc(12 * var(--k)));}
+#scope-constraint .ct.is-visible .lbl {opacity: 1; transform: none; transition: opacity 600ms ease var(--d), transform 700ms var(--ease) var(--d);}
+#scope-constraint .lbl svg {width: calc(52 * var(--k)); height: calc(52 * var(--k)); min-width: 24px; min-height: 24px; overflow: visible;}
+#scope-constraint .lbl__t {margin: 0; font-family: "Oswald", sans-serif; font-weight: 500;
+    font-size: max(13px, calc(28 * var(--k))); line-height: 1.214; color: #fff;}
+#scope-constraint .cap {position: absolute;
+    left: calc(var(--cx) * var(--k)); top: calc(397 * var(--k)); width: calc(170 * var(--k));
+    margin: 0; transform: translate(-50%, calc(10 * var(--k))); text-align: center;
+    font-size: calc(16 * var(--k)); line-height: 1.375; color: var(--caption);
+    opacity: 0; transition: color 350ms ease;}
+#scope-constraint .ct.is-visible .cap {opacity: 1; transform: translate(-50%, 0); transition: opacity 600ms ease var(--d), transform 700ms var(--ease) var(--d), color 350ms ease;}
+#scope-constraint .ico path {fill: #fff;}
+#scope-constraint .ico .bar {transform-box: fill-box; transform-origin: 50% 100%;}
+#scope-constraint .ico .check {transform-box: fill-box;}
+#scope-constraint .is-on .ico--bolt path {animation: zap 900ms steps(1) 1;}
+@keyframes zap { 0%, 30%, 60% { opacity: 1; } 15%, 45% { opacity: .2; } }
+#scope-constraint .is-on .ico--bars .bar {animation: grow 700ms var(--spring) both;}
+#scope-constraint .is-on .ico--bars .bar:nth-of-type(2) {animation-delay: 80ms;}
+#scope-constraint .is-on .ico--bars .bar:nth-of-type(3) {animation-delay: 160ms;}
+@keyframes grow { from { transform: scaleY(.1); } to { transform: scaleY(1); } }
+#scope-constraint .is-on .ico--check .check {animation: tick 600ms var(--ease) both;}
+@keyframes tick { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+#scope-constraint .ct[data-active] .disc:not(.is-on) .disc__body {opacity: .5;}
+#scope-constraint .disc.is-on .disc__body {filter: brightness(1.22) saturate(1.1);}
+#scope-constraint .disc.is-on .disc__ring {opacity: 1;}
+#scope-constraint .ct[data-active] .lens {opacity: .35;}
+#scope-constraint .ct[data-active="1"] .lens[data-pair="12"], #scope-constraint .ct[data-active="2"] .lens[data-pair="12"], #scope-constraint .ct[data-active="2"] .lens[data-pair="23"], #scope-constraint .ct[data-active="3"] .lens[data-pair="23"] {opacity: 1;}
+#scope-constraint .leader.is-on {stroke: var(--cyan);}
+#scope-constraint .tip.is-on {fill: var(--cyan); filter: drop-shadow(0 0 4px rgba(33, 233, 200, .9));}
+#scope-constraint .cap.is-on {color: #fff;}
+#scope-constraint .ct[data-active] .cap:not(.is-on), #scope-constraint .ct[data-active] .lbl:not(.is-on) {opacity: .45;}
+#scope-constraint .disc:focus-visible .disc__ring {opacity: 1;}
+#scope-constraint .ct__list {display: none;}
+@media (max-width: 760px) {
+#scope-constraint .ct {padding: 72px 20px;}
+#scope-constraint .ct__stage {margin-top: 32px; margin-bottom: calc(-100% * 100 / 814);}
+#scope-constraint .leader, #scope-constraint .tip, #scope-constraint .cap {display: none;}
+#scope-constraint .ct__list {display: grid; gap: 18px; list-style: none; margin: 28px 0 0; padding: 0;}
+#scope-constraint .ct__list li {padding-left: 18px; position: relative; color: var(--caption); font-size: 15px; line-height: 1.5; transition: color 300ms ease;}
+#scope-constraint .ct__list li::before {content: ""; position: absolute; left: 0; top: .6em; width: 6px; height: 6px; border-radius: 50%; background: var(--cyan);}
+#scope-constraint .ct__list strong {display: block; color: #fff; font-family: "Oswald", sans-serif; font-weight: 500; font-size: 18px; margin-bottom: 2px;}
+#scope-constraint .ct__list li.is-on {color: #fff;}
+}
+@media (prefers-reduced-motion: reduce) {
+#scope-constraint .ct *, #scope-constraint .ct *::before, #scope-constraint .ct *::after {animation: none !important; transition-duration: 1ms !important; transition-delay: 0ms !important;}
+}
+/* ===================== options ===================== */
+#scope-options {--bg: #141414;
+    --panel: #1A1A1A;
+    --line: #2A2A2A;
+    --cyan: #21E9C8;
+    --chosen: #15CBAD;
+    --panel-border: #0CA98E;
+    --cyan-pill: #21E9C8;
+    --cost: #FF8888;
+    --label: #FFFFFF;
+    --text: #F4F4F4;
+    --body: #CCCCCC;
+    --muted: #9F9F9F;
+    --ink: #131313;
+    --ease: cubic-bezier(.2, .7, .2, 1);}
+#scope-options * {box-sizing: border-box;}
+#scope-options .options {background: var(--bg);
+    padding: clamp(48px, 7vw, 80px) 20px;
+    display: flex; flex-direction: column; align-items: center; gap: 48px;
+    font-family: "Inter", system-ui, sans-serif;}
+#scope-options .options__title {margin: 0; text-align: center; color: #fff;
+    font-family: "Oswald", sans-serif; font-weight: 400;
+    font-size: clamp(48px, 7vw, 80px); line-height: normal; letter-spacing: -2px;}
+#scope-options .stage-wrap {--s: 1; width: 100%; max-width: 1023px; height: calc(var(--h, 480px) * var(--s)); position: relative;}
+#scope-options .stage {position: absolute; left: 0; top: 0; width: 1023px; height: 480px; transform: scale(var(--s)); transform-origin: 0 0;}
+#scope-options .stage svg {overflow: visible;}
+#scope-options .connections {position: absolute; left: 0; top: 0; width: 1023px; height: 480px; pointer-events: none;}
+#scope-options .connections line {stroke: #0BA58A; stroke-width: 1.2; stroke-dasharray: 10 8; fill: none;}
+#scope-options .node {position: absolute; width: 156px; height: 176px;
+    padding: 0; margin: 0; border: 0; background: none; cursor: pointer;
+    color: inherit; font: inherit;
+    transform: translateY(0);
+    transition: transform 190ms var(--ease);
+    -webkit-tap-highlight-color: transparent;}
+#scope-options .node[data-id="A"] {left: 73.5px; top: 109px;}
+#scope-options .node[data-id="B"] {left: 433.5px; top: 0;}
+#scope-options .node[data-id="C"] {left: 793.5px; top: 109px;}
+#scope-options .node:hover {transform: translateY(-3px);}
+#scope-options .node:focus-visible {outline: none;}
+#scope-options .node:focus-visible .node__focus {opacity: 1;}
+#scope-options .node__art {position: absolute; left: -22px; top: -22px; width: 200px; height: 220px; display: block;}
+#scope-options .node__art .layer {transition: opacity 220ms ease-out, filter 190ms ease-out;}
+#scope-options .node .l-blue, #scope-options .node .l-ring {opacity: 0;}
+#scope-options .node.is-active .l-blue {opacity: 1;}
+#scope-options .node.is-active .l-dark {opacity: 0;}
+#scope-options .node.is-active .l-ring {opacity: .7;}
+#scope-options .node:hover:not(.is-active) .l-dark {filter: brightness(1.25);}
+#scope-options .node--chosen:hover .l-illum {filter: brightness(1.08);}
+#scope-options .node__focus {position: absolute; inset: -30px; border-radius: 24px; outline: 2px solid var(--cyan); opacity: 0; pointer-events: none;}
+#scope-options .node__letter {position: absolute; left: 0; top: 0; width: 156px; height: 176px;
+    display: flex; align-items: center; justify-content: center; pointer-events: none;
+    font-family: "Inter", sans-serif; font-weight: 500; font-size: 40px; line-height: 1; color: #F1EFEC;}
+#scope-options .label {position: absolute; width: 303px;
+    display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center;}
+#scope-options .label[data-id="A"] {left: 0; top: 406px;}
+#scope-options .label[data-id="B"] {left: 360px; top: 291px;}
+#scope-options .label[data-id="C"] {left: 720px; top: 406px;}
+#scope-options .label__title {margin: 0; font-family: "Oswald", sans-serif; font-weight: 400; text-transform: capitalize;
+    font-size: max(22px, calc(13px / var(--s))); line-height: 1.12; color: var(--label);}
+#scope-options .pill {display: inline-flex; padding: 6px 10px; border-radius: 999px; white-space: nowrap;
+    font-family: "Inter", sans-serif; font-weight: 400; font-size: max(14px, calc(10px / var(--s))); line-height: 1.5;}
+#scope-options .pill--not {background: var(--panel); border: 1px solid var(--line); color: var(--muted); padding: 5px 9px;}
+#scope-options .pill--chosen {background: var(--chosen); color: var(--ink);}
+#scope-options .panel {width: 100%; max-width: 1024px;
+    background: var(--panel); border: 1px solid var(--panel-border); border-radius: 18px; overflow: hidden;}
+#scope-options .panel__divider {height: 1px; background: var(--line);}
+#scope-options .panel__body {display: flex; gap: 24px; align-items: flex-start; padding: 24px;}
+#scope-options .panel .fx {transition: opacity 200ms var(--ease), transform 220ms var(--ease);}
+#scope-options .panel.is-in .fx {transition-delay: var(--d, 0ms);}
+#scope-options .panel.is-out .fx {opacity: 0; transition: opacity 120ms ease-out;}
+#scope-options .panel.is-pre .fx {opacity: 0; transform: translateY(10px); transition: none;}
+#scope-options .reason {flex: 1 1 0; min-width: 0; min-height: 106px;
+    display: flex; flex-direction: column; gap: 16px;
+    border-right: 1px solid #292929; padding-right: 24px;}
+#scope-options .reason__title {margin: 0; font-family: "Oswald", sans-serif; font-weight: 400; font-size: 30px; line-height: 1.12; color: var(--text); text-transform: capitalize;}
+#scope-options .panel p.body {margin: 0; font-size: 14px; line-height: 20px; color: var(--body);}
+#scope-options .reason p.body {max-width: 528px;}
+#scope-options .trade {width: 200px; flex: none; display: flex; flex-direction: column; align-items: flex-start; gap: 16px;}
+#scope-options .tag {display: inline-flex; align-items: center; gap: 4px; padding: 4px 12px; border-radius: 34px;
+    font-family: "Oswald", sans-serif; font-weight: 500; font-size: 18px; line-height: normal; color: #000;}
+#scope-options .tag svg {width: 20px; height: 20px; display: block;}
+#scope-options .tag--gain {background: var(--cyan-pill);}
+#scope-options .tag--cost {background: var(--cost);}
+#scope-options .sr-only {position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;}
+@media (max-width: 760px) {
+#scope-options .panel__body {flex-wrap: wrap;}
+#scope-options .reason {flex: 1 1 100%; border-right: 0; padding-right: 0; border-bottom: 1px solid #292929; padding-bottom: 20px; min-height: 0;}
+#scope-options .trade {flex: 1 1 140px; width: auto;}
+#scope-options .reason__title {font-size: 26px;}
+}
+@media (prefers-reduced-motion: reduce) {
+#scope-options *, #scope-options *::before, #scope-options *::after {transition-duration: 1ms !important; transition-delay: 0ms !important;}
+}
+/* ===================== decision ===================== */
+#scope-decision {--bg: #141414;
+    --cyan: #21E9C8;
+    --label: #88FFEA;
+    --text: #F4F4F4;
+    --body: #CCCCCC;
+    --ease: cubic-bezier(.2, .7, .2, 1);}
+#scope-decision *, #scope-decision *::before, #scope-decision *::after {box-sizing: border-box;}
+#scope-decision .dr {background: var(--bg);
+    color: var(--text);
+    padding: 112px 80px;
+    font-family: "Inter", system-ui, sans-serif;
+    overflow: hidden;}
+#scope-decision .dr__title {margin: 0 0 64px;
+    text-align: center;
+    font-family: "Oswald", sans-serif; font-weight: 400;
+    font-size: clamp(48px, 6vw, 88px); line-height: 1.05; letter-spacing: -.02em; color: #fff;}
+#scope-decision .dr__grid {max-width: 1280px; margin: 0 auto;
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 80px; align-items: center;}
+#scope-decision .dr__heading {margin: 0 0 44px;
+    font-family: "Oswald", sans-serif; font-weight: 400;
+    font-size: 44px; line-height: 1.1; color: #DDDDDD;}
+#scope-decision .dr__list {list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 40px;}
+#scope-decision .item {all: unset; box-sizing: border-box; cursor: pointer;
+    display: flex; flex-direction: column; gap: 14px; width: 100%;
+    transition: opacity 350ms ease;}
+#scope-decision .item:focus-visible {outline: 2px solid var(--cyan); outline-offset: 8px; border-radius: 6px;}
+#scope-decision .item__title {font-family: "Oswald", sans-serif; font-weight: 400;
+    font-size: 26px; line-height: 1.15; color: var(--label);
+    display: inline-flex; align-items: center; gap: 0;
+    transition: gap 350ms var(--ease), color 300ms ease;}
+#scope-decision .item__title::before {content: ""; width: 0; height: 2px; background: var(--cyan); border-radius: 2px;
+    box-shadow: 0 0 10px rgba(33, 233, 200,.8);
+    transition: width 350ms var(--ease);}
+#scope-decision .item__body {max-width: 470px; font-size: 16px; line-height: 1.65; color: var(--body);}
+#scope-decision .item[data-active="true"] .item__title {gap: 12px; color: #BFFFF2;}
+#scope-decision .item[data-active="true"] .item__title::before {width: 22px;}
+#scope-decision .dr[data-focus] .item:not([data-active="true"]) {opacity: .42;}
+#scope-decision .rise {opacity: 0; transform: translateY(24px); transition: opacity 700ms var(--ease) var(--d, 0ms), transform 800ms var(--ease) var(--d, 0ms);}
+#scope-decision .dr.is-visible .rise {opacity: 1; transform: none;}
+#scope-decision .diagram-wrap {position: relative; perspective: 1400px;}
+#scope-decision .tilt {transform-style: preserve-3d; will-change: transform;}
+#scope-decision .diagram {display: block; width: 100%; height: auto; overflow: visible;}
+#scope-decision .floor line {stroke: #1C2826; stroke-width: 1;}
+#scope-decision .obj {opacity: 0; transform: translateY(26px); transition: opacity 700ms var(--ease) var(--d, 0ms), transform 900ms var(--ease) var(--d, 0ms);}
+#scope-decision .dr.is-visible .obj {opacity: 1; transform: none;}
+#scope-decision .obj[data-node] {cursor: pointer;}
+#scope-decision .node {--edge: #1FA88F; transition: opacity 400ms ease;}
+#scope-decision .lift {transition: transform 500ms var(--ease);}
+#scope-decision .face, #scope-decision .edge, #scope-decision .disc-top, #scope-decision .glass {stroke: var(--edge); stroke-width: 1; stroke-linejoin: round;
+    transition: stroke 350ms ease;}
+#scope-decision .face-l {fill: #0A1D1A;}
+#scope-decision .face-r {fill: #071512;}
+#scope-decision .disc-top {fill: #0D2A26;}
+#scope-decision .glass {fill: rgba(33, 233, 200, .06);}
+#scope-decision .detail {fill: none; stroke: var(--edge); stroke-width: 1; opacity: .8; transition: stroke 350ms ease;}
+#scope-decision .core {fill: var(--cyan); opacity: .75; transition: opacity 350ms ease;}
+#scope-decision .vent {stroke: var(--edge); stroke-width: 1.5; opacity: .55;}
+#scope-decision .row {stroke: var(--edge); stroke-width: 1; stroke-dasharray: 6 4; opacity: .6;}
+#scope-decision .col {stroke: var(--edge); opacity: .35;}
+#scope-decision .uiline {fill: none; stroke: var(--cyan); stroke-width: 1.6; stroke-linejoin: round; stroke-linecap: round;}
+#scope-decision .uibar {fill: rgba(33, 233, 200, .3);}
+#scope-decision .chart-line {stroke-dasharray: 1; stroke-dashoffset: 0;}
+#scope-decision .dot {fill: #fff;}
+#scope-decision .ring {fill: none; stroke: #25493F; stroke-dasharray: 3 5; transition: stroke 350ms ease;}
+#scope-decision .pool {opacity: .35; transition: opacity 500ms ease;}
+#scope-decision .bar {fill: var(--cyan); transform-box: fill-box; transform-origin: 50% 100%; animation: eq 1.4s ease-in-out infinite alternate;}
+@keyframes eq { from { transform: scaleY(.45); } to { transform: scaleY(1); } }
+#scope-decision .beam {opacity: .7; transition: opacity 500ms ease;}
+#scope-decision .particle {fill: #9AFFE9; opacity: 0; animation: rise 4s linear infinite;}
+@keyframes rise { 0% { transform: translateY(0); opacity: 0; } 20% { opacity: .9; } 100% { transform: translateY(-120px); opacity: 0; } }
+#scope-decision .float {animation: bob 5s ease-in-out infinite;}
+@keyframes bob { 50% { transform: translateY(-5px); } }
+#scope-decision .conn {fill: none; stroke: var(--cyan); stroke-width: 1.2; stroke-dasharray: 4 5; opacity: .5; transition: opacity 400ms ease;}
+#scope-decision .conn-hi {fill: none; stroke: var(--cyan); stroke-width: 2; stroke-linecap: round;
+    stroke-dasharray: 1; stroke-dashoffset: 1; opacity: 0;
+    filter: drop-shadow(0 0 4px rgba(33, 233, 200, .8));
+    transition: stroke-dashoffset 700ms var(--ease), opacity 300ms ease;}
+#scope-decision .pk {fill: #B4FFEF; transition: opacity 400ms ease;}
+#scope-decision .conn-dot {fill: var(--cyan);}
+#scope-decision .lbl {font-family: "Chakra Petch", "Inter", system-ui, sans-serif; font-size: 15px; font-weight: 500; fill: #E4FFFA; transition: fill 300ms ease;}
+#scope-decision .lbl-sub {font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10px; letter-spacing: .14em; fill: #3CFFDE;}
+#scope-decision .leader {stroke: #5F7A74; stroke-width: 1;}
+#scope-decision .leader-dot {fill: var(--cyan);}
+#scope-decision .dr[data-focus="mysql"] [data-node="mysql"] .node {--edge: var(--cyan);}
+#scope-decision .dr[data-focus="mysql"] [data-node="mysql"] .lift {transform: translateY(-9px);}
+#scope-decision .dr[data-focus="mysql"] [data-node="mysql"] .pool {opacity: 1;}
+#scope-decision .dr[data-focus="mysql"] [data-node="mysql"] .ring {stroke: rgba(33, 233, 200,.6);}
+#scope-decision .dr[data-focus="mysql"] [data-node="clickhouse"] .node, #scope-decision .dr[data-focus="mysql"] .beam {opacity: .3;}
+#scope-decision .dr[data-focus="mysql"] .conn-hi[data-path="FM"] {stroke-dashoffset: 0; opacity: 1;}
+#scope-decision .dr[data-focus="mysql"] .conn[data-path="FC"], #scope-decision .dr[data-focus="mysql"] .pk[data-path="FC"] {opacity: .12;}
+#scope-decision .dr[data-focus="mysql"] .lbl[data-for="mysql"] {fill: #fff;}
+#scope-decision .dr[data-focus="clickhouse"] [data-node="clickhouse"] .node {--edge: var(--cyan);}
+#scope-decision .dr[data-focus="clickhouse"] [data-node="clickhouse"] .lift {transform: translateY(-9px);}
+#scope-decision .dr[data-focus="clickhouse"] [data-node="clickhouse"] .pool {opacity: 1;}
+#scope-decision .dr[data-focus="clickhouse"] [data-node="clickhouse"] .ring {stroke: rgba(33, 233, 200,.6);}
+#scope-decision .dr[data-focus="clickhouse"] .beam {opacity: 1;}
+#scope-decision .dr[data-focus="clickhouse"] [data-node="clickhouse"] .chart-line {animation: draw 2.6s var(--ease) infinite;}
+#scope-decision .dr[data-focus="clickhouse"] [data-node="mysql"] .node {opacity: .3;}
+#scope-decision .dr[data-focus="clickhouse"] .conn-hi[data-path="FC"] {stroke-dashoffset: 0; opacity: 1;}
+#scope-decision .dr[data-focus="clickhouse"] .conn[data-path="FM"], #scope-decision .dr[data-focus="clickhouse"] .pk[data-path="FM"] {opacity: .12;}
+#scope-decision .dr[data-focus="clickhouse"] .lbl[data-for="clickhouse"] {fill: #fff;}
+@keyframes draw { 0% { stroke-dashoffset: 1; } 60%, 100% { stroke-dashoffset: 0; } }
+#scope-decision .dr[data-focus="fastapi"] [data-node="fastapi"] .node {--edge: var(--cyan);}
+#scope-decision .dr[data-focus="fastapi"] [data-node="fastapi"] .lift {transform: translateY(-9px);}
+#scope-decision .dr[data-focus="fastapi"] [data-node="fastapi"] .core {opacity: 1;}
+#scope-decision .dr[data-focus="fastapi"] .conn-hi[data-path="NF"], #scope-decision .dr[data-focus="fastapi"] .conn-hi[data-path="FM"], #scope-decision .dr[data-focus="fastapi"] .conn-hi[data-path="FC"] {stroke-dashoffset: 0; opacity: 1;}
+#scope-decision .dr[data-focus="fastapi"] [data-node="product"] .node {opacity: .45;}
+#scope-decision .dr[data-focus="fastapi"] .lbl[data-for="fastapi"] {fill: #fff;}
+@media (max-width: 1100px) {
+#scope-decision .dr__grid {grid-template-columns: minmax(0, 1fr); gap: 56px;}
+#scope-decision .diagram-wrap {max-width: 720px; margin: 0 auto; width: 100%;}
+}
+@media (max-width: 640px) {
+#scope-decision .dr {padding: 72px 24px;}
+#scope-decision .dr__title {margin-bottom: 44px;}
+#scope-decision .dr__heading {font-size: 32px; margin-bottom: 28px;}
+#scope-decision .item__title {font-size: 22px;}
+#scope-decision .item__body {font-size: 15px;}
+#scope-decision .lbl {font-size: 22px;}
+#scope-decision .lbl-sub {font-size: 14px;}
+}
+@media (prefers-reduced-motion: reduce) {
+#scope-decision .dr *, #scope-decision .dr *::before, #scope-decision .dr *::after {animation: none !important; transition-duration: 1ms !important; transition-delay: 0ms !important;}
+}
+/* ===================== result ===================== */
+#scope-result {--bg: #141414;
+    --cyan: #21E9C8;
+    --cyan-hi: #14B394;
+    --front: #19C9A9;
+    --white: #F4F7F7;
+    --ease: cubic-bezier(.2, .7, .2, 1);
+    --spring: cubic-bezier(.34, 1.5, .64, 1);}
+#scope-result *, #scope-result *::before, #scope-result *::after {box-sizing: border-box;}
+#scope-result .res {background: var(--bg); color: var(--white);
+    padding: 80px;
+    font-family: "Inter", system-ui, sans-serif;
+    overflow: hidden;}
+#scope-result .res__title {margin: 0; text-align: center;
+    font-family: "Oswald", sans-serif; font-weight: 400;
+    font-size: clamp(52px, 5.6vw, 80px); line-height: 1.48; letter-spacing: -2px; color: #fff;}
+#scope-result .res__caption {margin: 34px auto 0; max-width: 1246px; text-align: center;
+    font-weight: 300; font-size: 19px; line-height: 1.62; letter-spacing: -.19px; color: #E8EEEC;}
+#scope-result .res__stage {position: relative;
+    max-width: 1300px;
+    width: calc(100% * 1300 / 1280);
+    margin: 42px 0 0 calc(-100% * 10 / 1280);
+    aspect-ratio: 1300 / 260;
+    perspective: 1600px;}
+@media (min-width: 1441px) {
+#scope-result .res__stage {margin-left: auto; margin-right: auto; width: 1300px;}
+}
+#scope-result .res__tilt {position: absolute; inset: 0; transform-style: preserve-3d; will-change: transform;}
+#scope-result .unit {position: absolute;
+    left: calc((var(--x0) - 70) / 1300 * 100%);
+    top: calc((var(--y0) - 240) / 260 * 100%);
+    width: calc(var(--w) / 1300 * 100%);
+    aspect-ratio: var(--w) / var(--h);
+    container-type: inline-size;
+    pointer-events: none;
+    outline: none;}
+#scope-result .unit * {--k: calc(100cqw / var(--w));}
+#scope-result .plat {position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible;}
+#scope-result .plat__hit {fill: transparent; pointer-events: auto; cursor: pointer;}
+#scope-result .plat__body {transform-box: fill-box; transform-origin: 50% 100%;
+    opacity: 0; transform: translateY(40px) scaleY(.35);}
+#scope-result .res.is-visible .plat__body {opacity: 1; transform: none; transition: opacity 700ms ease var(--d), transform 1000ms var(--spring) var(--d);}
+#scope-result .plat__fill {transition: opacity 400ms ease; opacity: .9;}
+#scope-result .plat__edge {fill: none; stroke: var(--cyan-hi); stroke-width: 1.2; stroke-linejoin: round; opacity: .55; transition: opacity 400ms ease;}
+#scope-result .plat__front {fill: none; stroke: var(--front); stroke-width: 2.4; stroke-linecap: round;
+    filter: drop-shadow(0 0 5px rgba(25, 201, 169, .85));
+    stroke-dasharray: 1; stroke-dashoffset: 1;}
+#scope-result .res.is-visible .plat__front {stroke-dashoffset: 0; transition: stroke-dashoffset 900ms var(--ease) calc(var(--d) + 450ms);}
+#scope-result .plat__under {fill: none; stroke: #136B5C; stroke-width: 1.2; opacity: .9;}
+#scope-result .plat__streak {stroke: url(#res-streak); stroke-width: 1.2; opacity: .7;}
+#scope-result .res.is-ready .plat__front {animation: pulse 3.6s ease-in-out infinite; animation-delay: var(--d);}
+@keyframes pulse { 50% { filter: drop-shadow(0 0 9px rgba(33, 233, 200, 1)); } }
+#scope-result .plat__scan {opacity: 0;}
+#scope-result .res.is-ready .plat__scan {opacity: 1; animation: scan 5.5s ease-in-out infinite; animation-delay: var(--scan, 0s);}
+@keyframes scan { 0% { transform: translateX(-560px); } 55%, 100% { transform: translateX(560px); } }
+#scope-result .plat__beam {transform-box: fill-box; transform-origin: 50% 100%; transform: scaleY(0); opacity: 0; transition: transform 600ms var(--ease), opacity 400ms ease;}
+#scope-result .metric {position: absolute;
+    left: calc((var(--mx) - var(--x0)) * var(--k));
+    top: calc((var(--my) - var(--y0)) * var(--k));
+    width: calc(var(--mw) * var(--k));
+    display: flex; flex-direction: column; align-items: center; gap: calc(1 * var(--k));
+    pointer-events: auto; cursor: pointer;}
+#scope-result .metric__lift {display: flex; flex-direction: column; align-items: center; gap: inherit;
+    opacity: 0; transform: translateY(calc(30 * var(--k)));}
+#scope-result .res.is-visible .metric__lift {opacity: 1; transform: none; transition: opacity 700ms ease calc(var(--d) + 350ms), transform 900ms var(--ease) calc(var(--d) + 350ms);}
+#scope-result .metric__float {display: flex; flex-direction: column; align-items: center; gap: inherit; transition: transform 500ms var(--spring);}
+#scope-result .res.is-ready .metric__float {animation: float 5s ease-in-out infinite; animation-delay: var(--fd, 0s);}
+@keyframes float { 50% { transform: translateY(calc(-5 * var(--k))); } }
+#scope-result .metric__row {display: flex; align-items: baseline; line-height: 1;
+    font-family: "Oswald", sans-serif; font-weight: 500;}
+#scope-result .grad {background: linear-gradient(180deg, #F4F7F7 0%, #F4F7F7 36%, var(--g-end, #0FA58C) 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;}
+#scope-result .metric__num {display: block; font-size: calc(var(--fs) * var(--k)); height: calc(var(--nh) * var(--k));
+    font-variant-numeric: tabular-nums; white-space: nowrap;
+    transition: text-shadow 400ms ease, filter 400ms ease;}
+#scope-result .metric__unit {font-size: calc(var(--fu) * var(--k)); white-space: nowrap;}
+#scope-result .metric__label {margin: 0; font-weight: 500; font-size: max(13px, calc(16 * var(--k))); line-height: 1.2; color: var(--white); white-space: nowrap;
+    transition: color 300ms ease;}
+#scope-result .unit.is-active .metric__float {transform: translateY(calc(-14 * var(--k))) scale(1.04); animation-play-state: paused;}
+#scope-result .unit.is-active .metric__num {filter: drop-shadow(0 0 calc(18 * var(--k)) rgba(15, 174, 146, .5));}
+#scope-result .unit.is-active .plat__beam {transform: scaleY(1); opacity: 1;}
+#scope-result .unit.is-active .plat__fill {opacity: 1;}
+#scope-result .unit.is-active .plat__edge {opacity: 1;}
+#scope-result .res[data-active] .unit:not(.is-active) .plat__body, #scope-result .res[data-active] .unit:not(.is-active) .metric {opacity: .4; transition: opacity 400ms ease;}
+#scope-result .unit:focus-visible .metric__label {outline: 2px solid var(--cyan); outline-offset: 4px; border-radius: 3px;}
+@media (max-width: 760px) {
+#scope-result .res {padding: 72px 24px;}
+#scope-result .res__stage {width: 100%; margin: 36px 0 0; aspect-ratio: auto; perspective: none; display: flex; flex-direction: column; gap: 12px;}
+#scope-result .res__tilt {position: relative; display: flex; flex-direction: column; gap: 20px;}
+#scope-result .unit {position: relative; left: auto; top: auto; width: 100%; max-width: 560px; margin: 0 auto;}
+#scope-result .res__caption {font-size: 17px; margin-top: 28px;}
+}
+@media (prefers-reduced-motion: reduce) {
+#scope-result .res *, #scope-result .res *::before, #scope-result .res *::after {animation: none !important; transition-duration: 1ms !important; transition-delay: 0ms !important;}
+}
+#scope-result .unit[data-id="speedup"] {--g-end: #0FAE92;}
+#scope-result .metric__label {color: #F3F3F3;}
+/* ===================== retrospect ===================== */
+#scope-retrospect {--bg: #141414;
+    --cyan: #21E9C8;
+    --loop: #0F7B69;
+    --pill: #0A6556;
+    --grey-loop: #293231;
+    --line: #1F2C29;
+    --text: #E8EEEC;
+    --ease: cubic-bezier(.2, .7, .2, 1);
+    --spring: cubic-bezier(.34, 1.56, .64, 1);}
+#scope-retrospect *, #scope-retrospect *::before, #scope-retrospect *::after {box-sizing: border-box;}
+#scope-retrospect .rt {position: relative;
+    background: var(--bg);
+    padding: 80px 80px;
+    color: var(--text);
+    font-family: "Inter", system-ui, sans-serif;
+    overflow: hidden;}
+#scope-retrospect .rt__title {margin: 0;
+    text-align: center;
+    font-family: "Oswald", sans-serif; font-weight: 400;
+    font-size: clamp(52px, 5.6vw, 80px); line-height: 1.48; letter-spacing: -2px;
+    color: #fff; text-transform: capitalize;}
+#scope-retrospect .rt__stage {position: relative;
+    max-width: 1280px;
+    margin: 49px auto 0;
+    aspect-ratio: 1280 / 655;}
+#scope-retrospect .rt__art {position: absolute; inset: 0; width: 100%; height: 100%;
+    overflow: visible; pointer-events: none;}
+#scope-retrospect .rt__art .layer {transition: transform 600ms var(--ease);}
+#scope-retrospect .loop {fill: none; stroke-width: 2; stroke-linecap: round;}
+#scope-retrospect .loop--cyan {stroke: var(--loop);}
+#scope-retrospect .loop--grey {stroke: var(--grey-loop);}
+#scope-retrospect .draw {stroke-dasharray: 1; stroke-dashoffset: 1;}
+#scope-retrospect .rt.is-visible .draw {stroke-dashoffset: 0; transition: stroke-dashoffset 1500ms var(--ease) var(--d, 0ms);}
+#scope-retrospect .comet {fill: none; stroke: #B8FFF0; stroke-width: 3; stroke-linecap: round;
+    stroke-dasharray: .05 .95; stroke-dashoffset: 1; opacity: 0;
+    filter: drop-shadow(0 0 6px rgba(33, 233, 200, .9));}
+#scope-retrospect .rt.is-ready .comet {opacity: .85; animation: comet 7s linear infinite;}
+@keyframes comet { to { stroke-dashoffset: 0; } }
+#scope-retrospect .progress {fill: none; stroke: var(--loop); stroke-width: 2; stroke-linecap: round;
+    stroke-dasharray: 1; stroke-dashoffset: 1;
+    filter: drop-shadow(0 0 5px rgba(33, 233, 200, .55));
+    transition: stroke-dashoffset 900ms var(--ease);}
+#scope-retrospect .rt[data-q="1"] .progress {stroke-dashoffset: .667;}
+#scope-retrospect .rt[data-q="2"] .progress {stroke-dashoffset: .333;}
+#scope-retrospect .rt[data-q="3"] .progress {stroke-dashoffset: 0;}
+#scope-retrospect .blob {transform-box: fill-box; transform-origin: 0% 100%; transform: scale(0);}
+#scope-retrospect .blob--cyan {fill: var(--loop);}
+#scope-retrospect .blob--grey {fill: var(--grey-loop); transition: fill 700ms ease;}
+#scope-retrospect .rt.is-visible .blob {transform: scale(1); transition: transform 900ms var(--spring) var(--d, 0ms), fill 700ms ease;}
+#scope-retrospect .rt[data-q="1"] .blob--grey {fill: #23403A;}
+#scope-retrospect .rt[data-q="2"] .blob--grey {fill: #195C50;}
+#scope-retrospect .rt[data-q="3"] .blob--grey {fill: var(--loop);}
+#scope-retrospect .breathe {transform-box: fill-box; transform-origin: 60% 45%;}
+#scope-retrospect .rt.is-ready .breathe {animation: breathe 6s ease-in-out infinite;}
+#scope-retrospect .rt.is-ready .breathe--b {animation-delay: -3s;}
+@keyframes breathe { 50% { transform: scale(1.035); } }
+#scope-retrospect .rt__glow {position: absolute; left: 0; top: 0; width: 360px; height: 360px; margin: -180px 0 0 -180px;
+    border-radius: 50%; pointer-events: none;
+    background: radial-gradient(closest-side, rgba(33, 233, 200, .14), rgba(33, 233, 200, 0));
+    opacity: 0; transition: opacity 400ms ease, width 400ms var(--ease), height 400ms var(--ease), margin 400ms var(--ease);}
+#scope-retrospect .rt__stage:hover .rt__glow {opacity: 1;}
+#scope-retrospect .rt[data-q] .rt__glow {width: 480px; height: 480px; margin: -240px 0 0 -240px;}
+#scope-retrospect .rt__content {position: absolute; left: 50%; top: 37.25%;
+    width: 89.85%; transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 16px;}
+#scope-retrospect .rt__pill {margin: 0;
+    display: inline-flex; align-items: center;
+    min-height: 59.6px; padding: 0 19.86px; border-radius: 33.84px;
+    background: var(--pill); color: #fff;
+    font-family: "Oswald", sans-serif; font-weight: 400; font-size: 26px; line-height: 1.2;
+    clip-path: inset(0 50% 0 50% round 34px);}
+#scope-retrospect .rt__pill span {opacity: 0;}
+#scope-retrospect .rt.is-visible .rt__pill {clip-path: inset(0 0 0 0 round 34px); transition: clip-path 900ms var(--ease) 900ms;}
+#scope-retrospect .rt.is-visible .rt__pill span {opacity: 1; transition: opacity 500ms ease 1300ms;}
+#scope-retrospect .rt__questions {list-style: none; margin: 0; padding: 0; width: 100%;
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px;}
+#scope-retrospect .q {position: relative; display: flex; align-items: center; gap: 12px; padding: 16px 0;
+    cursor: default; outline: none;
+    opacity: 0; transform: translateY(14px);}
+#scope-retrospect .rt.is-visible .q {opacity: 1; transform: none; transition: opacity 600ms var(--ease) var(--d), transform 700ms var(--ease) var(--d);}
+#scope-retrospect .rt.is-ready .q {transition: opacity 350ms ease, transform 450ms var(--ease);}
+#scope-retrospect .q::before, #scope-retrospect .q::after {content: ""; position: absolute; left: 0; top: 0; width: 100%; height: 1px;
+    transform-origin: left; transform: scaleX(0);}
+#scope-retrospect .q::before {background: var(--line);}
+#scope-retrospect .q::after {background: linear-gradient(90deg, var(--cyan), rgba(33, 233, 200, .2)); box-shadow: 0 0 10px rgba(33, 233, 200, .6);}
+#scope-retrospect .rt.is-visible .q::before {transform: scaleX(1); transition: transform 900ms var(--ease) var(--d);}
+#scope-retrospect .q::after {transition: transform 600ms var(--ease);}
+#scope-retrospect .q__no {flex: none; width: 40px;
+    font-family: "Oswald", sans-serif; font-weight: 600; font-size: 32px; line-height: normal; color: var(--cyan);
+    transition: text-shadow 350ms ease, transform 450ms var(--spring);}
+#scope-retrospect .q__text {flex: 1 1 0; min-width: 0; font-size: 18px; line-height: 1.45; color: var(--text); transition: color 300ms ease;}
+#scope-retrospect .q.is-active::after {transform: scaleX(1);}
+#scope-retrospect .q.is-active .q__no {text-shadow: 0 0 18px rgba(33, 233, 200, .8); transform: translateY(-2px) scale(1.06);}
+#scope-retrospect .q.is-active .q__text {color: #fff;}
+#scope-retrospect .rt[data-q] .q:not(.is-active) {opacity: .4;}
+#scope-retrospect .q:focus-visible {outline: 2px solid var(--cyan); outline-offset: 6px; border-radius: 4px;}
+@media (max-width: 1100px) {
+#scope-retrospect .rt__pill {font-size: 22px;}
+#scope-retrospect .q__text {font-size: 16px;}
+#scope-retrospect .rt__questions {gap: 28px;}
+}
+@media (max-width: 900px) {
+#scope-retrospect .rt {padding: 72px 24px;}
+#scope-retrospect .rt__stage {aspect-ratio: auto; padding: 0; margin-top: 32px;}
+#scope-retrospect .rt__art, #scope-retrospect .rt__glow {display: none;}
+#scope-retrospect .rt__content {position: relative; left: auto; top: auto; width: 100%; transform: none;}
+#scope-retrospect .rt__pill {font-size: 20px; text-align: center; padding: 12px 20px;}
+#scope-retrospect .rt__questions {grid-template-columns: minmax(0, 1fr); gap: 4px;}
+}
+@media (prefers-reduced-motion: reduce) {
+#scope-retrospect .rt *, #scope-retrospect .rt *::before, #scope-retrospect .rt *::after {animation: none !important; transition-duration: 1ms !important; transition-delay: 0ms !important;}
+}
+/* ===================== footer ===================== */
+#scope-footer {--bg: #141414; --mint: #21E9C8;}
+#scope-footer .ft {display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  min-height: 72px; padding: 14px 48px;
+  background: var(--bg); border-top: 1px solid #2A2F33;
+  font-family: "Inter", system-ui, sans-serif;}
+#scope-footer .ft__social {display: flex; gap: 10px;}
+#scope-footer .ft__btn {position: relative; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 8px;
+  background: rgba(26, 26, 30, .4); border: 1px solid rgba(255, 255, 255, .12); color: #E0E0E0;
+  transition: transform 300ms cubic-bezier(.34, 1.5, .64, 1), border-color 300ms ease, color 300ms ease, box-shadow 300ms ease;}
+#scope-footer .ft__btn svg {width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;}
+#scope-footer .ft__btn svg.fill {fill: currentColor; stroke: none;}
+#scope-footer .ft__btn:hover, #scope-footer .ft__btn:focus-visible {transform: translateY(-3px); color: var(--mint); border-color: rgba(33, 233, 200, .55);
+  box-shadow: 0 6px 18px -8px rgba(33, 233, 200, .55); outline: none;}
+#scope-footer .ft__copy {margin: 0; font-size: 14px; line-height: 1.5; color: #E4E4E4; text-align: center;}
+#scope-footer .ft__top {display: inline-flex; align-items: center; height: 40px; padding: 8px 12px; border-radius: 999px; cursor: pointer;
+  background: #1A1D20; border: 1px solid #2A2F33; color: #90E0FF;
+  transition: border-color 300ms ease, box-shadow 300ms ease;}
+#scope-footer .ft__top svg {width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;}
+#scope-footer .ft__top:hover, #scope-footer .ft__top:focus-visible {border-color: rgba(144, 224, 255, .5); box-shadow: 0 0 16px -4px rgba(144, 224, 255, .5); outline: none;}
+#scope-footer .ft__top:hover svg {animation: nudge 900ms ease-in-out infinite;}
+@keyframes nudge { 50% { transform: translateY(-3px); } }
+#scope-footer .ft__btn, #scope-footer .ft__copy, #scope-footer .ft__top {opacity: 0; translate: 0 10px;}
+#scope-footer .ft.is-in .ft__btn, #scope-footer .ft.is-in .ft__copy, #scope-footer .ft.is-in .ft__top {opacity: 1; translate: 0 0; transition: opacity 500ms ease var(--d, 0ms), translate 600ms cubic-bezier(.2, .7, .2, 1) var(--d, 0ms), transform 300ms cubic-bezier(.34, 1.5, .64, 1), border-color 300ms ease, color 300ms ease, box-shadow 300ms ease;}
+@media (max-width: 760px) {
+#scope-footer .ft {flex-direction: column; padding: 24px; gap: 16px;}
+}
+@media (prefers-reduced-motion: reduce) {
+#scope-footer .ft *, #scope-footer .ft {animation: none !important; transition-duration: 1ms !important; transition-delay: 0ms !important;}
+}
+</style>
+</head>
+<body>
+<main>
+<div id="scope-topbar" class="story-section">
+<nav class="tb" id="story-topbar" aria-label="Page">
+  <div class="tb__inner">
+    <!-- Set data-home to your homepage URL (default "/"). If the visitor came from your
+         own site, the button goes back in history so they return to where they were. -->
+    <a class="tb__back" href="/#engineering-stories" data-home="/#engineering-stories">
+      <span class="tb__arrow" aria-hidden="true">
+        <svg viewBox="0 0 16 16"><path d="M13 8H3M7.5 3.5 3 8l4.5 4.5"/></svg>
+      </span>
+      <span class="tb__label">Back to Home</span>
+    </a>
+  </div>
+</nav>
+</div>
+<div id="scope-hero" class="story-section">
+<header class="hero" id="story-hero" aria-labelledby="hero-title">
+  <div class="hero__bg" aria-hidden="true"><div class="hero__img" style="background-image:url('data:image/jpeg;base64,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sVPFLioR09DQVqkDGq0bgjrUwYetWiJEwNOFRKwqQNVGLDdigvSGmmmZsZI4xVZ3zUsgqvsOa0SM7XExSinCM0MhFMT0E3gU0zAU1warS5pMlSZa88etQySg1TLsDRvNRzGnKySSSoSc0E5pKm5SVgpKWigYlLRRQAtFFFAgooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiikNACGkoNFItBRRRSGFJRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFACGkoooGFFFFABRRRQAUUUUAFFFFABRRRQAUCiigAooooAKcn3qbT04BNAM696qzVZeq0tIDOuKz5a0rhetUJF5piK9JinlaNtAXGYpcU/bRtoC4zFGKfigigQ2lBwaSigZahmxWhBMDWMGxVm3mII5pDOgifNWFas22lyKvI1AywDS1GrZp2aBik00mkLU0tQAM1QyNTmNQStQBBO3FZdwck1enes+U5NNEsgPWkxT8UYpkDMUuKdijFIY3FGKdilxQA3FAFOxRigAFOFJilAoAcDTwajpwNArEgNLmo80u6mIkzRuqIvSFzQIm30b6gzTgaYicSVIstVgacDQIupIKlV6oKxFTJLSKTLqtT91VkkzUgakWmS7qN1R76TdQO5IWqNjSFqjZqBXBjULmns1Qu1MljGNRE0rNTM0ALSgZpopy9aQyRF5qwiVFGKsxikykKqVKq0qipFWpLSEC08LSgUtAxMUYpcUYoAQio2qU1G9NAREU005qYTitInPMDUTdaVnxTS2a1icdRk8FWVqrDwKsoc1nM6KOw+jNJnimg81hJnTFDyOKqyvg1azxVOXljVQJnsML5pRzTKUGtzmYEUwjFPJoPIqrmbgQMcmkzQ4waid8UnIahcjuGzxVVqnkNVzyaybuzsgrRsIaWkNKKAYUooAp20+lMm42nA0hBFApDRIpqVTz1qBTipAwqWjaMiyspAp/wBoIqr5lHmVJrzIvpOSasrMMVmJIKsJIDWsTnqMuial3571VV6fvxVo53IkY5pgAzUby0K9UikyYUjdKaHpWbiglkTiq0gqy5qtIaGZdSpIMGmU+U5NMrJnRHYKKKSgYUlLSUALRiiigApaSloEFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAU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cJcUFKRbElRtLUQlzTHaiw2yRphVeSYUyRsVVlc+tJuxjy3Za80U5JRms/e1KJCDU8w3TNQPmpENZ8dx6mplul9adznlSZbY1C560n2hSOtQTTDBwaLkwg7kFw2WqGlY7jmkqDuirKwUUUUDCiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKQ0tNNA0NNLSd6WpLCiiigAoopKAFopKKAA0dqKKACiiigAoo7UUAFFFFABRRRQAhpKU0lAwooooAKKKKACiiigAooooAKKKKACiiigAooooAKSlNJQAUUUUALTl4BNNpx4WgGJ3pTSAUpoATFGKWigDczSg03NLSEOFFJS0gFFLTaXNAxaKTNGaAFopM0ZoAXNLTaWgB2aM03NLmgYtKKbS0AOFLTaWgYuaXNNzS0ALS5puaM0AOzRmm5pc0gFzRmkzRmgBc0uabmjNADs0ZpuaM0DHZpC1NJpC1IYpb3ppamlqYzUhpCs9Rs1IzVGWpFpDi1ITTc5opFC5pM0ZpM0ABNITQTTTQAE000pptMQUGikNMQhNRsacajY00S2IWoBppoFMVyQGlzUYNLmiw7kgal3VHmjdSsO5LuozUeacDRYLjxS0i08CkMbRUm2kK0AMBqRWqIjFAalYaZaR6sRye9UVapUkxSKNFH96lVqoRy+9WY5QapMhos5prGmb6az1VybA7VA70rvVaST3poiRMJPenq9UhLUiy1RncvK+akDVTSSpVkpDTLINKTUQcUpegoczVXkenO9VpJKljGSPVWR6fLJVZ3oAR3qItQzUwmqQhSaTNJmgUyWLmjNJS0xBSg0lFADgakBqIGnq1NENEympFNQK1PVqpMzaLKmpVNVkapVamQ0WAacDUIanBqYEwNANR7qUNTLQ80hGaAc06gqwwrTWWpcUhWgViqwIqvJIVNXJBVSVc0mSMW5IPJp5uPeqrLg0lRzMvluTPNmoC2TRSUm7jSsLS0lFAxaKSigQ4MR3pCSeppKKAFopKKACiiigAooooAKWkpaACiiigAooooAKKKKACiiigAooooAKKKSgANIaU000ikJSikoFIoWikooADRRRQAUUUUAFFFFABRRRQAUUUUAFFJRQAtJRQaAEooooGFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABSUUUAFFFKKAAU5vSkUc0Hk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zmmZozSAdnPWgHHFMzQTQA/NBNMzRmgB1IaTNGaAuLS4zTKUGmA7FIeKM01jxQAw9aSlpKozCiijGaAE5NPVPWgLilzQAvSgmm5ooEFFFIOeKBhg9gaesXGWOBTuIh6sajZix5NAWBgAcDmkoooAcshX3obD+1NoxQAhUikxUqcil46EA0hkVFPMYP3T+BpmMcUCCiijFABRRilxigBKKMZpwAX0JoGCoBy/T09aGct7AdBSfWjFACUUuKMUXEJRS/lRQAlFLijFAxKSnYpMUAKCcUYU+1GKTFAhwQHvSjApn407NMBpOTmkp2KSkMTFFLRQAlFLijFACUUuKKAEpcUYpcUAJ1pQKMYpaBBmkooxTuAUUUUXCwUUUYoAKKMUUgCkpaTFACUYpaMUDEopcUoFACKuad3pccUlAAeopO9OxzSDrQAp6CkIyaU0UAKOBTAKeelNoAKB92g0dqAAfdNFFHpQAN1ozS0hoASinY9qMUANxS4pcUYoAbiinYoxQAlJTsUYoATFJTqMUAJikxTsUYoAbS4pce1GKAG4op2KMUAJikxTsUYoAbijFOx7UYoAbijFOxRigBtGKdijFADcUU7FGKAG0uKXFGPagBuKKdijFADcUtLijFADaKdj2oxQA3FLilxRigBuKKdijFACUlOxRigBMUlOoxQA3FGKdijFADaXFLj2oxQA3FFOxRigBMUYpcUYoAbRTse1GKAAGlpMUtAwzRRRSHcKKKKAuFFFFAXFpKKKAuFLSUUBcWikooC4tFJRQFxaKSigLi0UlFAXHUZptFAXHZozTaKAuLmlzTaKAuLmlJzTaKAuOzSUlFAXFzSUUUBcKWkooC4tFJRQFxaSiigLhRRRQFwooooC4UUlFAXFozSUUBcM0daKKYhCpFGKd1o4FAhu3jminGkoAKSlooATFGKXFL0oAQJ3zik5BpetFACEknJoxS0YoATFGKWigBMUlOx7UYoAF4pSc0UUAJS57GikoANoPSkII60tLmgBtAXP0pcUo4oAQ8cCkxS0UAJijFLRigBMUYpaKAExRilooATFGKXFFACYoxS4oxQAmPailxRigBMUYpcUYoATFGKXHtRigBuKMU7FGKAEopcUYoAbilxS49qMUAJijFLiloAbRinUlACYoxS0UAJijFLijFACYoxS4ooATFGKWjFADaWlx7UYoAbilxS4ooAMUUUUDA0UtJQAUCigUALSUtJigANFFFABSUtGKACiijFAgpKXFGKAFwKXAoooGGKMCiigBMClxRRQAYowKKKADAowKKKADAowKKKADAoxRRQAmBS4FFFABikwKKKAFxRgUUUAJgUuKKKADFGBRRQAYFGBRRQAmBS4oooAMCjAoooAMUmBRRQAYFLgUUUAGKMCiigBMClxRRQAYowKKKAExRRRQAUUUUAHFFFFABRRRQAUcUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABiiiigAo4oooAKKKKADFGKKKADFGKKKACjFFFIAxRRRTAKMUUUAGKMUUUAGKKKKQBRRRTAKMUUUAGKKKKQBRRRTAMUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAYooooAMUYoopAFAoopgLijFFFABijAoooAMUYoooAMUYoooAMUYoooAMUYoooAMUYoooAMUYoooAMUYoooAMUmBRRQAYFLgUUUAGKMUUUAGKMUUUAGKMUUUAGKMUUUAGKMUUUAGKMUUUAGKMUUUAGKMUUUAGKMUUUAf/Z')"></div></div>
+  <div class="hero__spot" aria-hidden="true"></div>
+  <div class="hero__fade" aria-hidden="true"></div>
+
+  <div class="hero__content">
+    <span class="hero__pill"><svg class="hero__logo" viewBox="0 0 36 36" aria-hidden="true"><path d="M32.0564 9.60164C32.393 9.57464 32.483 9.20444 32.1866 9.07604L25.7588 6.34064L18.8168 3.38384L12.0578 0.508039C11.9444 0.460639 11.8058 0.469639 11.7008 0.533239C8.96716 2.19644 7.86376 4.27424 7.88776 6.47924C7.88656 6.59924 7.89256 6.72464 7.90216 6.85844C7.90216 6.86684 7.90276 6.87524 7.90336 6.88364C8.05996 8.89244 9.32716 12.3232 10.5926 14.779C10.6484 14.8882 10.664 15.0046 10.6292 15.121C10.0898 16.987 8.71156 19.1056 7.10296 20.2798C6.92356 20.4112 6.95836 20.644 7.16536 20.7346L13.2836 23.3392C13.5074 23.4346 13.5266 23.6962 13.3166 23.818C10.9886 25.138 6.85336 26.1592 3.94336 26.395C3.60676 26.422 3.51676 26.7922 3.81316 26.9206L10.241 29.656L17.183 32.6128L23.942 35.4916C24.0554 35.539 24.1934 35.53 24.2984 35.4664C27.032 33.8032 28.1354 31.7254 28.1114 29.5204C28.1126 29.4004 28.1066 29.275 28.097 29.1442C28.097 29.1358 28.0964 29.1274 28.0958 29.119C27.9392 27.1102 26.672 23.6794 25.4066 21.223C25.3508 21.1138 25.3352 20.9974 25.37 20.881C25.9094 19.015 27.2876 16.8964 28.8962 15.7222C29.0756 15.5908 29.0408 15.358 28.8338 15.2674L22.7156 12.6628C22.4918 12.5674 22.4726 12.3058 22.6826 12.184C25.0106 10.864 29.1458 9.84284 32.0558 9.60704V9.60164H32.0564ZM17.252 3.78824C17.5742 3.74804 17.762 4.07684 17.5214 4.26404C15.8 5.62244 15.0062 7.18484 14.8538 8.87384C14.8364 9.07304 14.5754 9.19424 14.3618 9.10424L8.83996 6.75284C8.61616 6.65744 8.59696 6.39584 8.80696 6.27404C10.9016 5.08784 14.4458 4.13984 17.249 3.78884H17.2526L17.252 3.78824ZM11.48 14.9686C11.9438 13.3576 13.0328 11.56 14.3594 10.3408C14.5502 10.1668 14.8988 10.2508 14.9402 10.4806C15.3146 12.5242 16.4126 15.5188 17.5376 17.7298C17.5934 17.839 17.606 17.9554 17.5742 18.0718C17.1104 19.6828 16.0208 21.4804 14.6948 22.6996C14.504 22.8736 14.1554 22.7896 14.114 22.5598C13.7396 20.5168 12.6416 17.5222 11.5166 15.3136C11.4608 15.2044 11.4482 15.088 11.48 14.9716V14.9686ZM14.6894 23.9374L20.225 26.2936C20.4488 26.389 20.468 26.6506 20.258 26.7724C18.1634 27.9616 14.6084 28.9042 11.7986 29.2528C11.4764 29.293 11.2886 28.9642 11.5292 28.777C13.2542 27.4186 14.0474 25.8562 14.1998 24.1648C14.2172 23.9656 14.4782 23.8444 14.6918 23.9344L14.6882 23.9374H14.6894ZM18.7442 32.209C18.422 32.2492 18.2342 31.9204 18.4748 31.7332C20.1968 30.3748 20.99 28.8124 21.1424 27.1234C21.1598 26.9242 21.4208 26.803 21.6344 26.893L27.1562 29.2444C27.38 29.3398 27.3992 29.6014 27.1892 29.7232C25.0946 30.9094 21.5504 31.8574 18.7472 32.2084H18.7436L18.7442 32.209ZM24.5162 21.0256C24.0524 22.6366 22.9628 24.4342 21.6368 25.6534C21.446 25.8274 21.0974 25.7434 21.056 25.5136C20.6816 23.4706 19.5836 20.4754 18.4586 18.2668C18.4028 18.1576 18.3902 18.0412 18.422 17.9248C18.8858 16.3138 19.9754 14.5162 21.3014 13.297C21.4922 13.123 21.8408 13.207 21.8822 13.4368C22.2566 15.4798 23.3546 18.4744 24.4796 20.686C24.5354 20.7952 24.548 20.9116 24.5162 21.028V21.025V21.0256ZM21.3068 12.0598L15.7712 9.70364C15.5474 9.60824 15.5282 9.34664 15.7382 9.22484C17.8328 8.03564 21.3872 7.09304 24.197 6.74384C24.5192 6.70364 24.707 7.03244 24.4664 7.21964C22.7414 8.57804 21.9476 10.141 21.7952 11.8318C21.7778 12.031 21.5168 12.1522 21.3032 12.0622L21.3062 12.0592L21.3068 12.0598Z" fill="#F0F0EB"/></svg><span>Shaped</span></span>
+    <div class="hero__text">
+      <h1 id="hero-title" class="hero__title" data-split>Why ClickHouse for Analytics?</h1>
+      <p class="hero__sub">
+        <span class="hero__sub-a">The problem wasn't storing data.</span>
+        <span class="hero__sub-b">It was querying it fast enough.</span>
+      </p>
+    </div>
+  </div>
+</header>
+</div>
+<div id="scope-problem" class="story-section">
+<section class="pb" id="the-problem" aria-labelledby="pb-title">
+  <div class="pb__knot" aria-hidden="true"><img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAG8AxUDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD5RooooAKKKKACiiigAozRQKADNFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUtFACc0UUUAFFFFABRRRQAZozRRQAUv40gooAWikooAWikooAWiiikAGkpaSmAUtJRQAtJzS0UgEooopgHNFFFABS0lFABzS0UlABR+NFLQAnNLSUtACUUtFIBKKKKYBRRRQAUUUUAFFFFABRRRQAUUUUALRSUUALSUUUgD8aKKKYCiikFFABRQaKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooopALRSUUAHeiiimAUUUUAFFFFABRRRQAUUUCgAoqe3tLm4OLe3ll/3UJq9F4e1iQZFky/7zKP60AZVLWz/AMIxrGM/Z1/7+CopfD+sRjJsnI/2WB/kaAMuipJ4JoG2TxSRN6OpFR0gCko70UwCiiigBfakoooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKOlFFIBRRQKKYCUUUUAFFLSUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFAoAKKKKACiiigAooooAKKKKACilooASiiigAooooAKKVQWYAAkngAd63tO8JavdoJJY0s4z/ABTnaT/wHrQBgUV2kPg2xjXN1qzse4jiA/Umlfwvoh4XUbtT6lVNAHFUV1sng6F/+PXWYSewljK/qCazb7wtrVqCy2v2lB/Fbnf+g5/SgDEopzKyuUdSrKcEEYIpKAEooooAKKKdHG8sixxozuxwFUZJP0oAbUlvBNcSrFBE8kjdFUZJrrNC8E3MwWfVHNtGefKX/WH69lrr7Kxs9Oh8mzt0hXuQOW+p6mgDiNL8HXcoEl/KLZf7g+Zz/QV0NloGk2RBjtVkcfxy/Mfy6fpWxJn3qMj1oAjB2jCqAPQDFPBNN49aTI7UASqw7gVYjjRxxVQc1LAxVgQaAJpbKKVSssSSKeoZcisHVfBthdKWtQbSX/Z5U/h/hXYWhWZcfxCpjBjnFAHiWtaLf6TLtu4jsJwsi8q341nV7zd2Nvd2729zEssTjDKw4ry7xr4Um0R/tVvulsXOA3eM+jf0NAHL0tJR2oAKKKKACiilpAIaKPeimAUUUUAFFFFABRRRQAGiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigApaSigBe9FAooASiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAopaSkAUUUtMBKKWigBKKKKACiiigApaSigAooNFABRRRQAVb0nTrnU7sW9suT1ZjwqD1JqC2hkuLhIYhl3OBXYW0kGmWQtLY8nmR+7t/hQBq6RZaZoUYMCLPd4+adxyD/ALPoP1pl9qUkjEli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FFFFABRRS0AJRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABS96KSkAoooFFMBKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAClQ4akoFAD2ptP6jNNIoASiiigApRSUUAOCmRgq9avwxrEm0cnufWoYEEa5P3jUqvzz0oAcwqJgalJGM1BNIFGO9ADWxjJpindIqqOpxmo3YseTUln/x8L7ZNAF6RvSoy1JIeaYTQA5mphNITSE0ALSSHZAx7niheSKZenCon1NAEagMM0FBTYm2tjsalagCFlIpuKmNNIFADKWjGanihA+aT8qAGxwFvmPC/zqYlVXCih5CeKjY0AMc5qMipDTDQAzpTgc/WkxRigB1JSj3pcUAJS5pKKAFzTgaZRQBJmjNMFKDQA7NKKbTlFAD0GTViMcVCgqzEKAGzfIhb06fWqBq1cyb2wPujpVc0AJiiiigBw6VLbklqjWgMYySOvagB1/JvmCjogx+Peq9B560ooASno2DTaBQBYZRIn8qqng4PGKnibB9jSXK8hx34NAENFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFAAaKKKAFFFAooASiiigAooooAKKKKACiiigAooooAKKKKACiigUAFFLSUAFFFFABRRRQAUUUUAPjPalNMFPByKAGnpSU40hoASpYE3HcegqNQWYAd6tqAoCjtQAtNY0pNRSPQArSkDAqAkk5JozSUAFTWn+tz/smoamtP9Yf92gCZzzTSaHPNMJoAXNJSZooAfH96o7v/AF2PQCpI+tRXHMzUAQ1IDlaZSigBSaACTxSqpJqQYUYFACooTk8mhmzTS1ITQApNNJozTSaAAmk60UuMdaAExRS4J6CkI9aAClBxSUUALwfagikpQSKAEpcUoYd6cNp70AMpRTwuelKENADQKkUUoXHUgfWl3qoz1+lAEkan6VHcT5BjQ8dz61DJKz8ZwPQUygCY9Aaa1KD8o+lJQAlGKUiigAWkl6g04U2XoKAI6VetJSjrQA4ikp2KQ0AANSAhlKnvUVPU80AQkYODRUkw+bPqKjoAKMUUUAFFGaKACiiigAooooAKKO1LQAUlFFABRRRQAUUUUAFFFFAC0lFFIBRRRRTASiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKUHB4pKKAJOopppFOKfwaAH268lj+FS5pqjCgUE0AI7YFQMcmnSNmmUAFFFFABUttxIfpUVSQHEgoAkfrTM05+ppmaAFzQDTaWgCRDzUU/wDrCfWnqabP1BoAjpVHNJThQA7NJSUZoAUmkzRSZoAKAKUCgnHSgAOF69ab1OaDz1oxQA5G21OHVxhgDVanDIoAkkh7oc+x61Dgg81KrnFKxVuGH40AQ0U5kI5HIptABRRRQAUozSU4UAKKV+lApJOtADKKKKAJh90fSjFApTwKAENIaDRQAA0j9KDSHpQAylWg0q0APNNNLSGgBKUUlAoAdLygPoaiqVv9WaioAKKKKACilpKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAoooNACiikFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABT4uWAplSQfeJ9BQBMTTWNBNMc0AMJyaSiigAooooAKcpwQabRQBNJ1zTKf1QGmGgAopM0ZoAepok5T6U0GnDkYNAEVKKCMHFJQAtLRRSAKAKMgUhOaYAT6UlFFAC4oxTgOKKAEpcUUUAFFFLQAA4pCAevWlpKAGlSKSnZoODQA2lFBBpKAHikPJoFFADacg+akp8YwM0APpD6UGkJoAKKSkzQAtIaTNFACGnDikpRQAUhoJpM0ALR3pKUUAO/hP0qKpM/KfpUdABRRRQAtIaKKACiiigAooooAKKKKAFpKWkoAKKKKACiiigAooooAKKKKAFFFAooASiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKBQAGpIuhqOnx8A0APJpjUppp5oAKSl7UlABRRRQAUUUoGTgUAPi6EUhp64AwKa45oAbSZoNJQAuacDTaUGgBZB3pop/VcUzoaAFpCaSigAooooAKKKWgABxUi4Ye9RUvIoAkKmkoWQ9DzS5BHFADaUUlGaAHUhpAaXOaAENJSmkoAAaPwopKAHDFGKbQDQAoHNSZwKZmlyDQAE0maWjAoAbmjrUg2+gpdwA4oAYEbGTxRt5pWamk0ABpuaCaSgAooooAKUdaSlFACtwtMpz9hTaAClpKKACg0tFIBKKKKYBRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABiilopAIKKUUUwEooo70AFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRSAKKKKYBRRS0AJRRS0gCnJ0NNpV60wFNJ3pTSZoAWm06kIoASiiigAp6cDP5U0DJxTm9KABTzSnkU0dKcDQAxqSnuKZQAUCiigBwNDDNNpwPFADaKU0lAC0YpKXNAC0hpRyKSgApcUUUAJjFFO60lAACaKKKACiiloASiloxQA2inYpCKAG0UuKKACjNJS0ALmlzTaWgBc0ZpKSgBaQmjNJQAUUUUAFFFFABSrSUpOBigBrHJoooFABRRRQAtJRRQAtJRS0gEooopgFAoooAKKWikAlFFFMAooooAKKKKADtS0lFIBRRQKKYCUUUUAFFLSUAFFFFAAaKKKACiiigAooooAKKKKACilopAFFFFACUUtFABRR3pKYBRRRSAKUUlKKAHGm0o6UlMBRS02loACKSnUEUAC8ZNBo6CkoAXtQDSGgdKAHjnimEUZpwORQAyilNJQAUopKKAHUhFApaAG0UpoAJNAAKBSkYooAKKKKAAUNQKU9KAEFFJS0AFFFFABmnCm0tABnHWkzSnpmmUAOoxSDNOzQA3FBpaMUAJRSkUmKADNGaMUUAJRRRQAUUUUAFFFGaAFpDQaSgAoFLSUAFApaKQBikpaKAEoFLSUAFFFFMAooooAKKKKACiiigAooooAKKKKAFpO9FLQAUUCigBKKKKACij8aKACiiigBaKKSkAUUUUwCiiigAooooAKKKBQAUUtJSAKWikpgFFLRSAKSlpKAFpKWigAooopgFFFFAC0uabSigBSaSg0lAC0UUHrQAUDg0E0lADuvNIaQcU7g0ANopTSUAFLSUUALTug96FGOe9IaAEzRRRQAZpabSigBRQ1ApG60AFKKbSigBaSlooAKKKKAFFNIwacKGoASikooAWjNJQaAFzS5popaADijFIaSgB2KMU2igB3HekOKSigAoopKAClpKKACiiigAooooAKWkpaQBSUUtACUUUUwCiiigAooooAKKKKACiiigAooooAKKKDQACigUUAFFFFABRS0lABRRRSAKO1FFMAooooAKKKKQBRS0UAJRRRTAKKKKACjtRRQAClpKKQC0UCkoAWkpaSgBaKKKACiiimAUCiigANFFFABRRRQAUUUUAFFFFAC5pKKUDNACU4DFKMCkNAAaQmg0lAC0lFFABS0lFADhTTzS54pKACiiigBR0paaKdQAUUUUAFLTc0oNACHrSUrUlACiikooAdQTxSdKSgAooooAKKKKACiiigA70UUUgEopaKAE60UtJTAKWkopAFFLRQAlFFFMAooooAKKKKACiiigAooooAKKKKACiiigAFFFFAAKKUUUAJRRS0AJRS0lABRRRQAUUUUAFFFFABRRRQAUUUUALSUUUgCiilpgJQaKWgBKKKWgBKKKKAFooopAFFFFMAooopAFFFFMAooooAKKKKACiiigApcUlLmgBRRSZpKAHUmaSigAooooAKKKKACiiigAooooAKKKKAClpKKAFBozSUUAFFFFAC0lFFABRRRQAUUUUAFFFFABQaKKAEoopaACkpaSkAtJS0UAJS0lFAB2opaKAEopaSgBaQ0UUwCiiigAoopcUAJRS0lIAooopgFFFFABRRRQAd6KKKAFFFIKKAClpKWkAUlFFMAoooFAC0n40tJQAUUUfhQAUd6KKACiiikAUUUUwCloopAFFFFABRRRQAlLSUopgFFFFIAooopgFHeikoAWiiikAUUUUwCiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKSlpKQBRRRTAWikpaQBRRSUAGaPrRS0AJS0lFABRS0lMAo7UUUAFFLSUgClpKKAFpKKKYBRRRQAUUUUAFFFFABRR3ooABRQKKACiiloASilopAJRS0UAJRS0UwEooo7UAFFFFABRRRQAUCigUALSUvtSUAFLSUvagBKWiikAlFL3pKYBRRRSAO9LRRQAUlFFMApaKDSAKKKKACiiimAUUUUgCikpaACikpaACjtRRQAUUUUAFFFFMApKWigBKKWikAUUUUAFFFFMAooooAKKKKQBRRRTAKKKKACiiigANFFFIApKWjvQAUlLSUAFLRRQAUlLSUAFFFFABRRRTAKKKKACiijvQAUUUUAFFHeigAooooAKKKKACiiigAooooAKKKKAAUUoooASloxRigAoooxQAneloxRigAoooxQAmaWjFGKAA0lLRigBKKXFGKAEopcUYoAKKMUYoAO1JS4oxQAlFLijFACUUuKMUAJRS4ooAKKKMUAFFGKMUAFFGKMUAFFFGKACijFGKQBRRijFMApKXFGKAEpaMUUABoNGKKAEpaMUUAFFFFABRRRigApO9LRigA7UUUYoAKKKMUAFFGKKACijFGKACijFGKACijFFABRRRigAooooAKKKKACkpaMUAFFGKKACiiigBKKWjFACUUuKMUAIaKXFFACUUuKMUAJQaXFGKAEopcUYoASilxRQAUUUYoAKSlxRigBKKXFGKAEopcUYoABRRRQB/9k=" alt="" width="789" height="444" loading="lazy" decoding="async"></div>
+  <div class="pb__inner">
+    <h2 id="pb-title" class="pb__title">The Problem</h2>
+    <p class="pb__text" data-words>The product needed customer-facing analytics, but analytical queries have very different access patterns from normal application requests. Using the same database for everything can become increasingly difficult as analytical queries grow more complex.</p>
+  </div>
+</section>
+</div>
+<div id="scope-constraint" class="story-section">
+<section class="ct" id="the-constraint" aria-labelledby="ct-title">
+  <h2 id="ct-title" class="ct__title">The Constraint</h2>
+
+  <div class="ct__stage">
+    <div class="ct__tilt">
+      <svg class="ct__svg" viewBox="0 0 814 463" aria-hidden="false" role="group" aria-label="Three constraints the system had to satisfy together">
+        <defs>
+          <!-- disc gradients sampled from the design -->
+          <linearGradient id="ct-g1" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#0F7B6C"/><stop offset=".13" stop-color="#0E695D"/><stop offset=".39" stop-color="#0D4D44"/>
+            <stop offset=".65" stop-color="#0C312C"/><stop offset="1" stop-color="#0C1A18"/>
+          </linearGradient>
+          <linearGradient id="ct-g2" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#0E5B50"/><stop offset=".44" stop-color="#0B3F38"/>
+            <stop offset=".61" stop-color="#0C302B"/><stop offset="1" stop-color="#0B1412"/>
+          </linearGradient>
+          <linearGradient id="ct-g3" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#073A32"/><stop offset=".35" stop-color="#082A25"/>
+            <stop offset=".63" stop-color="#0A1D1A"/><stop offset=".92" stop-color="#0B1010"/><stop offset="1" stop-color="#0C0D0D"/>
+          </linearGradient>
+          <radialGradient id="ct-sheen" cx=".5" cy=".5" r=".5">
+            <stop offset="0" stop-color="#BFFFF1" stop-opacity=".16"/>
+            <stop offset="1" stop-color="#BFFFF1" stop-opacity="0"/>
+          </radialGradient>
+          <!-- hatching: thin lines ~22° -->
+          <pattern id="ct-hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(22)">
+            <line x1="0" y1="4" x2="8" y2="4" stroke="#FFFFFF" stroke-opacity=".2" stroke-width=".9"/>
+          </pattern>
+          <clipPath id="ct-c1"><circle cx="174" cy="174" r="174"/></clipPath>
+          <clipPath id="ct-c2"><circle cx="407" cy="174" r="174"/></clipPath>
+          <clipPath id="ct-c3"><circle cx="640" cy="174" r="174"/></clipPath>
+        </defs>
+
+        <!-- discs (later ones sit on top, as in the design) -->
+        <g class="disc" data-i="1" tabindex="0" role="button" aria-label="Fast queries">
+          <g class="disc__move" style="--from:233px;--ox:174px;--d:250ms">
+            <g class="disc__body">
+              <circle cx="174" cy="174" r="174" fill="url(#ct-g1)"/>
+              <g clip-path="url(#ct-c1)"><circle class="disc__sheen" data-sheen cx="174" cy="174" r="150" fill="url(#ct-sheen)"/></g>
+              <circle class="disc__stroke" cx="174" cy="174" r="173.5"/>
+            </g>
+            <circle class="disc__ring" cx="174" cy="174" r="174"/>
+          </g>
+        </g>
+        <g class="disc" data-i="2" tabindex="0" role="button" aria-label="Large analytical workloads">
+          <g class="disc__move" style="--from:0px;--ox:407px;--d:100ms">
+            <g class="disc__body">
+              <circle cx="407" cy="174" r="174" fill="url(#ct-g2)"/>
+              <g clip-path="url(#ct-c2)"><circle class="disc__sheen" data-sheen cx="407" cy="174" r="150" fill="url(#ct-sheen)"/></g>
+              <circle class="disc__stroke" cx="407" cy="174" r="173.5"/>
+            </g>
+            <circle class="disc__ring" cx="407" cy="174" r="174"/>
+          </g>
+        </g>
+        <!-- overlap 1∩2 hatching (on disc 2) -->
+        <g class="lens" data-pair="12" style="--d:1150ms" pointer-events="none">
+          <g clip-path="url(#ct-c1)"><g clip-path="url(#ct-c2)">
+            <rect class="lens__drift" x="200" y="-40" width="200" height="440" fill="url(#ct-hatch)"/>
+          </g></g>
+        </g>
+        <g class="disc" data-i="3" tabindex="0" role="button" aria-label="Operational reliability">
+          <g class="disc__move" style="--from:-233px;--ox:640px;--d:250ms">
+            <g class="disc__body">
+              <circle cx="640" cy="174" r="174" fill="url(#ct-g3)"/>
+              <g clip-path="url(#ct-c3)"><circle class="disc__sheen" data-sheen cx="640" cy="174" r="150" fill="url(#ct-sheen)"/></g>
+              <circle class="disc__stroke" cx="640" cy="174" r="173.5"/>
+            </g>
+            <circle class="disc__ring" cx="640" cy="174" r="174"/>
+          </g>
+        </g>
+        <!-- overlap 2∩3 hatching (on disc 3) -->
+        <g class="lens" data-pair="23" style="--d:1250ms" pointer-events="none">
+          <g clip-path="url(#ct-c2)"><g clip-path="url(#ct-c3)">
+            <rect class="lens__drift" x="433" y="-40" width="200" height="440" fill="url(#ct-hatch)"/>
+          </g></g>
+        </g>
+
+        <!-- leaders + endpoints -->
+        <line class="leader" data-i="1" pathLength="1" x1="149.4" y1="347" x2="149.4" y2="390" style="--d:1300ms"/>
+        <line class="leader" data-i="2" pathLength="1" x1="407" y1="347" x2="407" y2="390" style="--d:1400ms"/>
+        <line class="leader" data-i="3" pathLength="1" x1="652.4" y1="347" x2="652.4" y2="390" style="--d:1500ms"/>
+        <circle class="tip" data-i="1" cx="149.4" cy="390" r="2.1" style="--d:1750ms"/>
+        <circle class="tip" data-i="2" cx="407" cy="390" r="2.1" style="--d:1850ms"/>
+        <circle class="tip" data-i="3" cx="652.4" cy="390" r="2.1" style="--d:1950ms"/>
+      </svg>
+
+      <!-- labels inside the discs -->
+      <div class="lbl" data-i="1" style="--x:32;--y:135;--w:163;--d:700ms">
+        <svg class="ico ico--bolt" viewBox="0 0 52 52" aria-hidden="true">
+          <path d="M22.8582 39.4335L34.0707 26.0002H25.404L26.9748 13.7043L16.954 28.1668H24.4832L22.8582 39.4335ZM17.3332 47.6668L19.4998 32.5002H8.6665L28.1665 4.3335H32.4998L30.3332 21.6668H43.3332L21.6665 47.6668H17.3332Z"/>
+        </svg>
+        <p class="lbl__t">Fast Queries</p>
+      </div>
+      <div class="lbl" data-i="2" style="--x:265;--y:115;--w:209;--d:600ms">
+        <svg class="ico ico--bars" viewBox="0 0 52 52" aria-hidden="true">
+          <path d="M10.8333 45.5C9.64167 45.5 8.62153 45.0757 7.77292 44.2271C6.92431 43.3785 6.5 42.3583 6.5 41.1667V10.8333C6.5 9.64167 6.92431 8.62153 7.77292 7.77292C8.62153 6.92431 9.64167 6.5 10.8333 6.5H41.1667C42.3583 6.5 43.3785 6.92431 44.2271 7.77292C45.0757 8.62153 45.5 9.64167 45.5 10.8333V41.1667C45.5 42.3583 45.0757 43.3785 44.2271 44.2271C43.3785 45.0757 42.3583 45.5 41.1667 45.5H10.8333ZM10.8333 41.1667H41.1667V10.8333H10.8333V41.1667Z"/>
+          <path class="bar" d="M15.1667 36.8333H19.5V26H15.1667V36.8333Z"/>
+          <path class="bar" d="M23.8333 36.8333H28.1667V30.3333H23.8333V36.8333ZM23.8333 26H28.1667V21.6667H23.8333V26Z"/>
+          <path class="bar" d="M32.5 36.8333H36.8333V15.1667H32.5V36.8333Z"/>
+        </svg>
+        <p class="lbl__t">Large Analytical Workloads</p>
+      </div>
+      <div class="lbl" data-i="3" style="--x:498;--y:120;--w:175;--d:700ms">
+        <svg class="ico ico--check" viewBox="0 0 52 52" aria-hidden="true">
+          <path d="M8.66683 45.5C7.47516 45.5 6.45502 45.0757 5.60641 44.2271C4.7578 43.3785 4.3335 42.3583 4.3335 41.1667V10.8333C4.3335 9.64167 4.7578 8.62153 5.60641 7.77292C6.45502 6.92431 7.47516 6.5 8.66683 6.5H43.3335C44.5251 6.5 45.5453 6.92431 46.3939 7.77292C47.2425 8.62153 47.6668 9.64167 47.6668 10.8333V41.1667C47.6668 42.3583 47.2425 43.3785 46.3939 44.2271C45.5453 45.0757 44.5251 45.5 43.3335 45.5H8.66683ZM8.66683 41.1667H43.3335V10.8333H8.66683V41.1667Z"/>
+          <path d="M10.8335 36.8333H21.6668V32.5H10.8335V36.8333ZM10.8335 28.1667H21.6668V23.8333H10.8335V28.1667ZM10.8335 19.5H21.6668V15.1667H10.8335V19.5Z"/>
+          <path class="check" d="M31.5252 32.5L42.2501 21.775L39.1626 18.6875L31.5252 26.3792L28.4377 23.2917L25.4043 26.3792L31.5252 32.5Z"/>
+        </svg>
+        <p class="lbl__t">Operational Reliability</p>
+      </div>
+
+      <!-- captions under the leaders -->
+      <p class="cap" data-i="1" style="--cx:149.4;--d:1900ms">Responsive enough for customer-facing product views.</p>
+      <p class="cap" data-i="2" style="--cx:407;--d:2000ms">Able to scan and aggregate growing event volumes.</p>
+      <p class="cap" data-i="3" style="--cx:652.4;--d:2100ms">Without putting the core application workload at risk.</p>
+    </div>
+  </div>
+
+  <!-- mobile-only caption list (same content) -->
+  <ul class="ct__list">
+    <li data-i="1"><strong>Fast Queries</strong>Responsive enough for customer-facing product views.</li>
+    <li data-i="2"><strong>Large Analytical Workloads</strong>Able to scan and aggregate growing event volumes.</li>
+    <li data-i="3"><strong>Operational Reliability</strong>Without putting the core application workload at risk.</li>
+  </ul>
+</section>
+</div>
+<div id="scope-options" class="story-section">
+<!-- Shared vector definitions -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <path id="hex" d="M68 3C74.6667 -1 81.3333 -1 88 3L146 36C152.667 40 156 45.6667 156 53V122C156 130 152.667 136 146 140L88 173C81.3333 177 74.6667 177 68 173L10 140C3.33333 136 0 130 0 122V53C0 45.6667 3.33333 40 10 36L68 3Z"/>
+    <path id="ring" d="M85.5 7.74 Q99.5 0 113.5 7.74 L185 47.26 Q199 55 199 71 L199 148 Q199 164 185 171.74 L113.5 211.26 Q99.5 219 85.5 211.26 L14 171.74 Q0 164 0 148 L0 71 Q0 55 14 47.26 Z"/>
+    <filter id="blueGlow" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="2.2"/></filter>
+    <linearGradient id="illumGrad" x1="84.04" y1="176" x2="71.96" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0C6757"/>
+      <stop offset=".5" stop-color="#0B8A74"/>
+      <stop offset="1" stop-color="#22EBC8"/>
+    </linearGradient>
+    <filter id="illumInner" x="0" y="0" width="156" height="176" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="bg"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="bg" result="shape"/>
+      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+      <feMorphology radius="5" operator="erode" in="SourceAlpha" result="eroded"/>
+      <feOffset/>
+      <feGaussianBlur stdDeviation="10"/>
+      <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.149772 0 0 0 0 0.860043 0 0 0 0 0.736772 0 0 0 1 0"/>
+      <feBlend mode="normal" in2="shape"/>
+    </filter>
+
+    <!-- inactive -->
+    <g id="hexDark">
+      <use href="#hex" fill="#1F2625" stroke="#455354" stroke-width="1.5"/>
+    </g>
+    <!-- clicked / active: blue border -->
+    <g id="hexBlue">
+      <use href="#hex" fill="none" stroke="#40FEDD" stroke-width="3" opacity=".4" filter="url(#blueGlow)"/>
+      <use href="#hex" fill="#1F2625" stroke="#40FEDD" stroke-width="1.5"/>
+    </g>
+    <!-- chosen: solid mint gradient with a soft inner glow (Figma 873:269399) -->
+    <g id="hexIllum">
+      <use href="#hex" fill="url(#illumGrad)" filter="url(#illumInner)"/>
+    </g>
+  </defs>
+</svg>
+
+<section class="options" aria-labelledby="options-heading">
+  <h2 id="options-heading" class="options__title">The Options</h2>
+
+  <div class="stage-wrap">
+    <div class="stage">
+      <!-- connectors & stems (geometry from the Figma "Connection lines" layer) -->
+      <svg class="connections" viewBox="0 0 1023 480" aria-hidden="true">
+        <line x1="247.1" y1="142" x2="437.1" y2="43.5"/>
+        <line x1="586.1" y1="43.5" x2="798.1" y2="151.5"/>
+        <line x1="509.7" y1="200.5" x2="509.7" y2="279"/>
+        <line x1="151.6" y1="306.5" x2="151.6" y2="388.5"/>
+        <line x1="871.6" y1="306.5" x2="871.6" y2="388.5"/>
+      </svg>
+
+      <button type="button" class="node" data-id="A" aria-pressed="false" aria-controls="option-panel">
+        <svg class="node__art" viewBox="-22 -22 200 220" aria-hidden="true">
+          <use href="#hexDark" class="layer l-dark"/>
+          <use href="#hexBlue" class="layer l-blue"/>
+          <use href="#ring" class="layer l-ring" x="-22" y="-22" fill="none" stroke="#0BA58A" stroke-width="1.25" stroke-opacity=".7" stroke-dasharray="11 8"/>
+        </svg>
+        <span class="node__letter" aria-hidden="true">A</span>
+        <span class="node__focus"></span>
+        <span class="sr-only">Option A: Keep everything in MySQL. Not chosen.</span>
+      </button>
+
+      <button type="button" class="node" data-id="B" aria-pressed="false" aria-controls="option-panel">
+        <svg class="node__art" viewBox="-22 -22 200 220" aria-hidden="true">
+          <use href="#hexDark" class="layer l-dark"/>
+          <use href="#hexBlue" class="layer l-blue"/>
+          <use href="#ring" class="layer l-ring" x="-22" y="-22" fill="none" stroke="#0BA58A" stroke-width="1.25" stroke-opacity=".7" stroke-dasharray="11 8"/>
+        </svg>
+        <span class="node__letter" aria-hidden="true">B</span>
+        <span class="node__focus"></span>
+        <span class="sr-only">Option B: Build custom aggregation layers. Not chosen.</span>
+      </button>
+
+      <button type="button" class="node node--chosen" data-id="C" aria-pressed="false" aria-controls="option-panel">
+        <svg class="node__art" viewBox="-22 -22 200 220" aria-hidden="true">
+          <use href="#hexIllum" class="layer l-illum"/>
+          <use href="#ring" class="layer l-ring" x="-22" y="-22" fill="none" stroke="#0BA58A" stroke-width="1.25" stroke-opacity=".7" stroke-dasharray="11 8"/>
+        </svg>
+        <span class="node__letter" aria-hidden="true">C</span>
+        <span class="node__focus"></span>
+        <span class="sr-only">Option C: Separate analytics with ClickHouse. Chosen.</span>
+      </button>
+
+      <div class="label" data-id="A">
+        <p class="label__title">Keep everything in MySQL</p>
+        <span class="pill pill--not">Not Chosen</span>
+      </div>
+      <div class="label" data-id="B">
+        <p class="label__title">Build custom aggregation layers</p>
+        <span class="pill pill--not">Not Chosen</span>
+      </div>
+      <div class="label" data-id="C">
+        <p class="label__title">Separate analytics with ClickHouse</p>
+        <span class="pill pill--chosen">Chosen</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel is-in" id="option-panel" role="region" aria-live="polite" aria-label="Option details">
+    <div class="panel__divider"></div>
+    <div class="panel__body">
+      <div class="reason">
+        <h3 class="reason__title fx" data-f="heading">Why we considered it</h3>
+        <p class="body fx" data-f="considered" style="--d:40ms"></p>
+      </div>
+      <div class="trade fx" style="--d:80ms">
+        <span class="tag tag--gain">
+          <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 4.5v11M4.5 10h11" stroke="#000" stroke-width="1.6" stroke-linecap="round"/></svg>
+          Benefit
+        </span>
+        <p class="body" data-f="gain"></p>
+      </div>
+      <div class="trade fx" style="--d:130ms">
+        <span class="tag tag--cost">
+          <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4.5 10h11" stroke="#000" stroke-width="1.6" stroke-linecap="round"/></svg>
+          Drawback
+        </span>
+        <p class="body" data-f="cost"></p>
+      </div>
+    </div>
+  </div>
+</section>
+</div>
+<div id="scope-decision" class="story-section">
+<section class="dr" id="decision-rationale" aria-labelledby="dr-title">
+  <h2 id="dr-title" class="dr__title rise">Decision Rationale</h2>
+
+  <div class="dr__grid">
+    <div class="dr__content">
+      <h3 class="dr__heading rise" style="--d:120ms">Why We Chose The Approach</h3>
+      <ul class="dr__list">
+        <li class="rise" style="--d:220ms">
+          <button type="button" class="item" data-key="mysql" aria-pressed="false">
+            <span class="item__title">MySQL For Operational Data</span>
+            <span class="item__body">Keep transactional application data in MySQL, where the existing product workflows already operate reliably.</span>
+          </button>
+        </li>
+        <li class="rise" style="--d:330ms">
+          <button type="button" class="item" data-key="clickhouse" aria-pressed="false">
+            <span class="item__title">ClickHouse For Analytics</span>
+            <span class="item__body">Move analytical workloads to ClickHouse so complex, high-volume queries do not compete with core application requests.</span>
+          </button>
+        </li>
+        <li class="rise" style="--d:440ms">
+          <button type="button" class="item" data-key="fastapi" aria-pressed="false">
+            <span class="item__title">FastAPI As The Analytics Layer</span>
+            <span class="item__body">Use FastAPI to serve the analytics experience and connect the application with the appropriate data source.</span>
+          </button>
+        </li>
+      </ul>
+    </div>
+
+    <div class="diagram-wrap">
+      <div class="tilt">
+        <svg class="diagram" id="dr-diagram" viewBox="64 28 680 622" role="img"
+             aria-label="Architecture: Product to Next.js to FastAPI. FastAPI serves MySQL for application data and ClickHouse for analytics."></svg>
+      </div>
+    </div>
+  </div>
+</section>
+</div>
+<div id="scope-result" class="story-section">
+<section class="res" id="the-result" aria-labelledby="res-title">
+  <h2 id="res-title" class="res__title">The Result</h2>
+
+  <!-- shared SVG defs -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <defs>
+      <linearGradient id="res-fill" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#0F2A25" stop-opacity=".55"/>
+        <stop offset=".55" stop-color="#11463D"/>
+        <stop offset="1" stop-color="#115C50"/>
+      </linearGradient>
+      <linearGradient id="res-beam" x1="0" y1="1" x2="0" y2="0">
+        <stop offset="0" stop-color="#21E9C8" stop-opacity=".32"/>
+        <stop offset=".7" stop-color="#21E9C8" stop-opacity=".06"/>
+        <stop offset="1" stop-color="#21E9C8" stop-opacity="0"/>
+      </linearGradient>
+      <linearGradient id="res-scan" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#9AFFE9" stop-opacity="0"/>
+        <stop offset=".5" stop-color="#9AFFE9" stop-opacity=".22"/>
+        <stop offset="1" stop-color="#9AFFE9" stop-opacity="0"/>
+      </linearGradient>
+      <linearGradient id="res-streak" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#19C9A9" stop-opacity=".9"/>
+        <stop offset="1" stop-color="#19C9A9" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+  </svg>
+
+  <div class="res__stage">
+    <div class="res__tilt" id="res-units"></div>
+  </div>
+
+  <p class="res__caption">Analytics workloads moved off the primary database, improving query performance without affecting operational traffic.</p>
+</section>
+</div>
+<div id="scope-retrospect" class="story-section">
+<section class="rt" id="in-retrospect" aria-labelledby="rt-title">
+  <h2 id="rt-title" class="rt__title">In Retrospect</h2>
+
+  <div class="rt__stage">
+    <!-- Decorative loops & droplets (viewBox = the design's 1280×655 area at x80/y247) -->
+    <svg class="rt__art" viewBox="80 247 1280 655" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+      <g class="layer" data-depth="6">
+        <!-- left loop (cyan): from its top end, round the left, into the cyan droplet -->
+        <path class="loop loop--cyan draw" style="--d:150ms" pathLength="1"
+              d="M614.1 322 A327 327 0 1 0 561 863.5"/>
+        <path class="comet" pathLength="1" d="M614.1 322 A327 327 0 1 0 561 863.5"/>
+        <!-- right loop (grey): from the grey droplet, round the right, to its lower end -->
+        <path class="loop loop--grey draw" style="--d:350ms" pathLength="1"
+              d="M879.6 284.1 A328 328 0 1 1 825.9 831"/>
+        <path class="progress" pathLength="1" d="M879.6 284.1 A328 328 0 1 1 825.9 831"/>
+      </g>
+      <g class="layer" data-depth="16">
+        <g class="breathe">
+          <path class="blob blob--cyan" style="--d:1250ms" d="M561 863.5 C579 854 580 836 580 812 L580 776 A81 81 0 1 1 661 857 L624 857 C595 857 578 857 561 863.5 Z"/>
+        </g>
+        <g transform="rotate(180 720.3 573.8)">
+          <g class="breathe breathe--b">
+            <path class="blob blob--grey" style="--d:1400ms" d="M561 863.5 C579 854 580 836 580 812 L580 776 A81 81 0 1 1 661 857 L624 857 C595 857 578 857 561 863.5 Z"/>
+          </g>
+        </g>
+      </g>
+    </svg>
+
+    <div class="rt__glow" aria-hidden="true"></div>
+
+    <div class="rt__content">
+      <p class="rt__pill"><span>If I were building this again, I'd evaluate the same decision around three questions:</span></p>
+      <ol class="rt__questions">
+        <li class="q" tabindex="0" data-q="1" style="--d:1500ms">
+          <span class="q__no" aria-hidden="true">Q1</span>
+          <span class="q__text">How quickly is analytics volume growing?</span>
+        </li>
+        <li class="q" tabindex="0" data-q="2" style="--d:1620ms">
+          <span class="q__no" aria-hidden="true">Q2</span>
+          <span class="q__text">How much operational complexity does another datastore introduce?</span>
+        </li>
+        <li class="q" tabindex="0" data-q="3" style="--d:1740ms">
+          <span class="q__no" aria-hidden="true">Q3</span>
+          <span class="q__text">Can simpler aggregation solve the problem first?</span>
+        </li>
+      </ol>
+    </div>
+  </div>
+</section>
+</div>
+<div id="scope-footer" class="story-section">
+<footer class="ft" id="site-footer">
+  <nav class="ft__social" aria-label="Social profiles">
+    <!-- Replace each href with your real profile URL -->
+    <a class="ft__btn" href="#" aria-label="LinkedIn" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 10.5V16M8 7.6v.1M11.5 16v-5.5M11.5 13c0-1.6 1-2.6 2.4-2.6 1.4 0 2.1.9 2.1 2.6V16"/></svg>
+    </a>
+    <a class="ft__btn" href="#" aria-label="GitHub" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.4 5.4 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+    </a>
+    <a class="ft__btn" href="#" aria-label="Codeforces" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" aria-hidden="true" class="fill"><rect x="4" y="10" width="4" height="9" rx="1"/><rect x="10" y="5" width="4" height="14" rx="1"/><rect x="16" y="12" width="4" height="7" rx="1"/></svg>
+    </a>
+    <a class="ft__btn" href="#" aria-label="Facebook" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 2h-3a5 5 0 0 0-5 5v3H6v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+    </a>
+  </nav>
+  <p class="ft__copy">© 2026 Sheikh Md. Kibria | All Rights Reserved</p>
+  <button type="button" class="ft__top" aria-label="Back to top">
+    <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 13V3M3.5 7.5 8 3l4.5 4.5"/></svg>
+  </button>
+</footer>
+</div>
+</main>
+<script>
+/* ---- topbar ---- */
+(function (host) {
+  if (!host || host.dataset.init) return;
+  host.dataset.init = "1";
+const root = host.querySelector('#story-topbar');
+const back = root.querySelector('.tb__back');
+const home = back.dataset.home || '/';
+back.setAttribute('href', home);
+
+/* If the visitor arrived from another page of this site, go back in history
+   (keeps their scroll position on the homepage); otherwise follow the link. */
+back.addEventListener('click', (e) => {
+  let sameSite = false;
+  try { sameSite = !!document.referrer && new URL(document.referrer).origin === location.origin; } catch (_) {}
+  if (sameSite && history.length > 1) { e.preventDefault(); history.back(); }
+});
+
+requestAnimationFrame(() => root.classList.add('is-in'));
+})(document.getElementById("scope-topbar"));
+
+/* ---- hero ---- */
+(function (host) {
+  if (!host || host.dataset.init) return;
+  host.dataset.init = "1";
+const root = host.querySelector('#story-hero');
+const img = root.querySelector('.hero__img');
+const spot = root.querySelector('.hero__spot');
+const content = root.querySelector('.hero__content');
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* Split the title into words for the staggered mask reveal */
+const title = root.querySelector('[data-split]');
+const words = title.textContent.trim().split(/\s+/);
+title.setAttribute('aria-label', title.textContent.trim());
+title.innerHTML = words.map((w, i) => `<span class="w" aria-hidden="true"><span style="--d:${350 + i * 90}ms">${w}</span></span>`).join(' ');
+
+requestAnimationFrame(() => requestAnimationFrame(() => root.classList.add('is-in')));
+setTimeout(() => root.classList.add('is-ready'), reduced ? 0 : 3300);
+
+if (!reduced) {
+  /* Scroll: background drifts slower than the page, content lifts and fades as it leaves */
+  let ticking = false;
+  const onScroll = () => {
+    if (ticking) return; ticking = true;
+    requestAnimationFrame(() => {
+      const r = root.getBoundingClientRect();
+      const p = Math.min(1, Math.max(0, -r.top / r.height));
+      root.style.setProperty('--by', `${(p * 90).toFixed(1)}px`);
+      content.style.transform = `translateY(${(-p * 40).toFixed(1)}px)`;
+      content.style.opacity = String(1 - p * .85);
+      ticking = false;
+    });
+  };
+  addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  /* Pointer: light follows the cursor, background shifts a touch the other way */
+  if (matchMedia('(pointer: fine)').matches) {
+    let tx = 0, ty = 0, x = 0, y = 0, sx = 0, sy = 0, gx = 0, gy = 0, raf = 0;
+    const loop = () => {
+      x += (tx - x) * .06; y += (ty - y) * .06;
+      sx += (gx - sx) * .2; sy += (gy - sy) * .2;
+      root.style.setProperty('--bx', `${(-x * 14).toFixed(1)}px`);
+      spot.style.transform = `translate(${sx.toFixed(1)}px, ${sy.toFixed(1)}px)`;
+      raf = (Math.abs(tx - x) + Math.abs(ty - y) + Math.abs(gx - sx) + Math.abs(gy - sy) > .05) ? requestAnimationFrame(loop) : 0;
+    };
+    const kick = () => { if (!raf) raf = requestAnimationFrame(loop); };
+    root.addEventListener('pointermove', (e) => {
+      const r = root.getBoundingClientRect();
+      tx = (e.clientX - r.left) / r.width - .5; ty = (e.clientY - r.top) / r.height - .5;
+      gx = e.clientX - r.left; gy = e.clientY - r.top; kick();
+    });
+    root.addEventListener('pointerleave', () => { tx = 0; ty = 0; kick(); });
+  }
+}
+})(document.getElementById("scope-hero"));
+
+/* ---- problem ---- */
+(function (host) {
+  if (!host || host.dataset.init) return;
+  host.dataset.init = "1";
+const root = host.querySelector('#the-problem');
+const img = root.querySelector('.pb__knot img');
+const text = root.querySelector('[data-words]');
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* Split the paragraph into words (screen readers still get the plain sentence) */
+const plain = text.textContent.trim();
+text.setAttribute('aria-label', plain);
+text.innerHTML = plain.split(/\s+/).map((w) => `<span class="w" aria-hidden="true">${w}</span>`).join(' ');
+const words = [...text.querySelectorAll('.w')];
+
+const io = new IntersectionObserver(([e]) => {
+  if (!e.isIntersecting) return;
+  root.classList.add('is-in');
+  setTimeout(() => root.classList.add('is-ready'), reduced ? 0 : 1600);
+  io.disconnect();
+}, { threshold: .25 });
+io.observe(root);
+
+if (reduced) {
+  words.forEach((w) => w.classList.add('on'));
+} else {
+  /* Scroll-linked reading highlight + gentle vertical parallax on the sculpture */
+  let ticking = false;
+  const onScroll = () => {
+    if (ticking) return; ticking = true;
+    requestAnimationFrame(() => {
+      const r = text.getBoundingClientRect();
+      const vh = innerHeight;
+      // 0 when the paragraph's top reaches 85% of the viewport, 1 when its bottom reaches 45%
+      const p = Math.min(1, Math.max(0, (vh * .85 - r.top) / (r.height + vh * .4)));
+      const lit = Math.round(p * words.length);
+      words.forEach((w, i) => w.classList.toggle('on', i < lit));
+      const s = root.getBoundingClientRect();
+      const q = (vh - s.top) / (vh + s.height); // 0..1 while the section crosses the screen
+      root.style.setProperty('--ky', `${((q - .5) * -36).toFixed(1)}px`);
+      ticking = false;
+    });
+  };
+  addEventListener('scroll', onScroll, { passive: true });
+  addEventListener('resize', onScroll);
+  onScroll();
+
+  /* Pointer: the sculpture leans away from the cursor */
+  if (matchMedia('(pointer: fine)').matches) {
+    root.addEventListener('pointermove', (e) => {
+      const r = root.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width - .5;
+      root.style.setProperty('--kx', `${(-x * 24).toFixed(1)}px`);
+    });
+    root.addEventListener('pointerleave', () => root.style.setProperty('--kx', '0px'));
+  }
+}
+})(document.getElementById("scope-problem"));
+
+/* ---- constraint ---- */
+(function (host) {
+  if (!host || host.dataset.init) return;
+  host.dataset.init = "1";
+const root = host.querySelector('#the-constraint');
+  const stage = root.querySelector('.ct__stage');
+  const svg = root.querySelector('.ct__svg');
+  const tilt = root.querySelector('.ct__tilt');
+  const discs = [...root.querySelectorAll('.disc')];
+  const linked = (i) => root.querySelectorAll(`[data-i="${i}"]`);
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let locked = null;
+
+  function setActive(i) {
+    if (i) root.dataset.active = i; else delete root.dataset.active;
+    root.querySelectorAll('[data-i]').forEach((el) => el.classList.toggle('is-on', el.dataset.i === String(i)));
+  }
+
+  discs.forEach((d) => {
+    const i = d.dataset.i;
+    d.addEventListener('mouseenter', () => setActive(i));
+    d.addEventListener('mouseleave', () => setActive(locked));
+    d.addEventListener('focus', () => setActive(i));
+    d.addEventListener('blur', () => setActive(locked));
+    d.addEventListener('click', () => { locked = locked === i ? null : i; setActive(locked || i); });
+    d.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); d.dispatchEvent(new MouseEvent('click')); }
+      if (e.key === 'ArrowRight') { (discs[discs.indexOf(d) + 1] || discs[0]).focus(); e.preventDefault(); }
+      if (e.key === 'ArrowLeft') { (discs[discs.indexOf(d) - 1] || discs[discs.length - 1]).focus(); e.preventDefault(); }
+    });
+  });
+  // captions / mobile list items also respond to hover
+  root.querySelectorAll('.cap, .ct__list li').forEach((el) => {
+    el.addEventListener('mouseenter', () => setActive(el.dataset.i));
+    el.addEventListener('mouseleave', () => setActive(locked));
+  });
+
+  /* Entrance: discs slide out from the centre, overlaps hatch in, leaders drop */
+  const io = new IntersectionObserver(([e]) => {
+    if (!e.isIntersecting) return;
+    root.classList.add('is-visible');
+    setTimeout(() => root.classList.add('is-ready'), reduced ? 0 : 2400);
+    io.disconnect();
+  }, { threshold: .3 });
+  io.observe(root);
+
+  /* Pointer: a soft light follows the cursor across the discs + gentle 3D tilt */
+  if (!reduced && matchMedia('(pointer: fine)').matches) {
+    const sheens = [...root.querySelectorAll('[data-sheen]')];
+    const centers = [174, 407, 640];
+    let tx = 0, ty = 0, x = 0, y = 0, px = 407, py = 174, sx = 407, sy = 174, raf = 0;
+    const loop = () => {
+      x += (tx - x) * .07; y += (ty - y) * .07;
+      sx += (px - sx) * .15; sy += (py - sy) * .15;
+      tilt.style.transform = `rotateX(${(-y * 4).toFixed(2)}deg) rotateY(${(x * 5).toFixed(2)}deg)`;
+      sheens.forEach((s, k) => {
+        // each disc's highlight leans toward the pointer, staying inside its disc
+        const dx = Math.max(-110, Math.min(110, sx - centers[k]));
+        const dy = Math.max(-110, Math.min(110, sy - 174));
+        s.setAttribute('cx', (centers[k] + dx * .7).toFixed(1));
+        s.setAttribute('cy', (174 + dy * .7).toFixed(1));
+      });
+      raf = (Math.abs(tx - x) + Math.abs(ty - y) + Math.abs(px - sx) + Math.abs(py - sy) > .05) ? requestAnimationFrame(loop) : 0;
+    };
+    const kick = () => { if (!raf) raf = requestAnimationFrame(loop); };
+    stage.addEventListener('pointermove', (e) => {
+      const r = svg.getBoundingClientRect();
+      const u = (e.clientX - r.left) / r.width, v = (e.clientY - r.top) / r.height;
+      tx = (u - .5) * 2; ty = (v - .5) * 2;
+      px = u * 814; py = v * 463;
+      kick();
+    });
+    stage.addEventListener('pointerleave', () => { tx = 0; ty = 0; kick(); });
+  }
+})(document.getElementById("scope-constraint"));
+
+/* ---- options ---- */
+(function (host) {
+  if (!host || host.dataset.init) return;
+  host.dataset.init = "1";
+const CHOSEN = 'C';
+  const DATA = {
+    A: {
+      heading: 'Why we didn\'t choose it',
+      considered: 'Keeping both transactional and analytical workloads in MySQL meant they would continue competing for the same database resources.',
+      gain: 'Simplest infrastructure to operate.',
+      cost: 'Operational and analytical workloads stay tightly coupled.'
+    },
+    B: {
+      heading: 'Why we didn\'t choose it',
+      considered: 'Custom aggregation could improve query performance, but it would push more analytics-specific complexity into the application layer.',
+      gain: 'More control over precomputed analytics data.',
+      cost: 'More application logic, maintenance, and aggregation complexity.'
+    },
+    C: {
+      heading: 'Why we chose it',
+      considered: 'ClickHouse provided a separate analytics-oriented datastore without forcing heavy analytical workloads onto the primary application database.',
+      gain: 'Clear workload separation and analytics-focused querying.',
+      cost: 'Another datastore and more infrastructure to operate.'
+    }
+  };
+
+  const root = host.querySelector('.options');
+  const wrap = root.querySelector('.stage-wrap');
+  const stage = root.querySelector('.stage');
+  const nodes = [...root.querySelectorAll('.node')];
+  const panel = root.querySelector('.panel');
+  const f = (k) => panel.querySelector(`[data-f="${k}"]`);
+  const nextFrame = (fn) => requestAnimationFrame(() => requestAnimationFrame(fn));
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  let active = CHOSEN;
+  let timer = null;
+
+  /* Scale the 1023px design grid to the available width */
+  function fit() {
+    const s = Math.min(1, wrap.clientWidth / 1023);
+    wrap.style.setProperty('--s', s);
+    let h = 480; // labels can grow on small screens; measure the real stage height
+    stage.querySelectorAll('.label').forEach((l) => { h = Math.max(h, l.offsetTop + l.offsetHeight); });
+    wrap.style.setProperty('--h', h + 'px');
+  }
+
+  function fill(id) {
+    const d = DATA[id];
+    f('heading').textContent = d.heading;
+    f('considered').textContent = d.considered;
+    f('gain').textContent = d.gain;
+    f('cost').textContent = d.cost;
+  }
+
+  function setPhase(p) {
+    panel.classList.remove('is-in', 'is-out', 'is-pre');
+    panel.classList.add('is-' + p);
+  }
+
+  function paint() {
+    nodes.forEach((n) => {
+      const on = n.dataset.id === active;
+      n.classList.toggle('is-active', on);
+      n.setAttribute('aria-pressed', String(on));
+    });
+  }
+
+  function bringPanelIntoView() {
+    const r = panel.getBoundingClientRect();
+    if (r.bottom <= innerHeight - 16) return;
+    const stageTop = wrap.getBoundingClientRect().top;
+    const delta = Math.min(r.bottom - innerHeight + 24, stageTop - 12);
+    if (delta > 8) scrollBy({ top: delta, behavior: reduceMotion ? 'auto' : 'smooth' });
+  }
+
+  function select(id) {
+    bringPanelIntoView();
+    if (id === active) return;
+    active = id;
+    paint();
+    clearTimeout(timer);
+    setPhase('out');
+    timer = setTimeout(() => {
+      fill(id);
+      setPhase('pre');
+      nextFrame(() => setPhase('in'));
+    }, 120);
+  }
+
+  nodes.forEach((n) => n.addEventListener('click', () => select(n.dataset.id)));
+
+  stage.addEventListener('keydown', (e) => {
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    const order = ['A', 'B', 'C'];
+    const i = order.indexOf(document.activeElement?.dataset?.id);
+    if (i < 0) return;
+    root.querySelector(`.node[data-id="${order[(i + (e.key === 'ArrowRight' ? 1 : 2)) % 3]}"]`).focus();
+    e.preventDefault();
+  });
+
+  addEventListener('resize', fit);
+  if (document.fonts) document.fonts.ready.then(fit);
+
+  // Initial state: only the chosen option's (C) details are shown
+  fill(active);
+  paint();
+  fit();
+})(document.getElementById("scope-options"));
+
+/* ---- decision ---- */
+(function (host) {
+  if (!host || host.dataset.init) return;
+  host.dataset.init = "1";
+/* ================= Isometric helpers ================= */
+  const CX = Math.cos(Math.PI / 6);
+  const EX = [CX, .5], EY = [-CX, .5];
+  const iso = (c, u, v, z = 0) => [c[0] + (u - v) * CX, c[1] + (u + v) * .5 - z];
+  const r1 = (n) => Math.round(n * 10) / 10;
+  const pts = (a) => a.map((p) => r1(p[0]) + ',' + r1(p[1])).join(' ');
+  const pathOf = (a) => 'M' + a.map((p) => r1(p[0]) + ' ' + r1(p[1])).join(' L');
+  const lerp = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+  const up = (p, h) => [p[0], p[1] - h];
+  const add = (p, d, s) => [p[0] + d[0] * s, p[1] + d[1] * s];
+
+  function box(c, w, d, h) {
+    const L = iso(c, -w / 2, d / 2), B = iso(c, w / 2, d / 2), R = iso(c, w / 2, -d / 2), T = iso(c, -w / 2, -d / 2);
+    return { L, B, R, T,
+      left: pts([L, B, up(B, h), up(L, h)]),
+      right: pts([B, R, up(R, h), up(B, h)]),
+      top: pts([up(L, h), up(B, h), up(R, h), up(T, h)]) };
+  }
+  const rhombus = (c, w, d, z) => pts([iso(c, -w / 2, d / 2, z), iso(c, w / 2, d / 2, z), iso(c, w / 2, -d / 2, z), iso(c, -w / 2, -d / 2, z)]);
+  const pp = (o, dir, s, t) => [o[0] + dir[0] * s, o[1] + dir[1] * s - t];
+  const panel = (o, dir, len, h) => pts([pp(o, dir, 0, 0), pp(o, dir, len, 0), pp(o, dir, len, h), pp(o, dir, 0, h)]);
+
+  /* ================= Layout (follows the reference image) ================= */
+  const P = [390, 128];             // Product
+  const N = [390, 272];             // Next.js
+  const F = [390, 458];             // FastAPI
+  const M = iso(F, 0, 200);         // MySQL (down-left)
+  const C = iso(F, 200, 0);         // ClickHouse (down-right)
+
+  const slab = box(P, 96, 96, 10);
+  const next = box(N, 92, 92, 40);
+  const api = box(F, 112, 112, 72);
+
+  const DB = { rx: 50, dh: 18, gap: 5 };
+  const RY = DB.rx * .577;
+
+  /* connectors */
+  const PATHS = {
+    PN: (() => {
+      const a = iso(P, 48, 0);                      // product front-right edge
+      const b = add(a, EX, 34);
+      const c = [b[0], up(iso(N, 46, -46), 40)[1]]; // drop to Next.js top-right corner
+      return pathOf([a, b, c]);
+    })(),
+    NF: (() => {
+      const a = iso(N, 46, 0);
+      const b = add(a, EX, 46);
+      const c = [b[0], up(iso(F, 56, -56), 72)[1] + 6];
+      return pathOf([a, b, c]);
+    })(),
+    FM: pathOf([iso(F, 0, 56), M]),
+    FC: pathOf([iso(F, 56, 0), C]),
+  };
+
+  /* ================= Builders ================= */
+  const g = (attrs, inner) => `<g ${attrs}>${inner}</g>`;
+
+  function floor() {
+    let s = '';
+    for (let k = -14; k <= 16; k++) {
+      const y0 = k * 44;
+      s += `<line x1="-40" y1="${y0}" x2="${-40 + 1100 * EX[0]}" y2="${y0 + 1100 * EX[1]}"/>`;
+      s += `<line x1="840" y1="${y0}" x2="${840 + 1100 * EY[0]}" y2="${y0 + 1100 * EY[1]}"/>`;
+    }
+    return `<g class="floor" mask="url(#dr-fade-mask)" aria-hidden="true">${s}</g>`;
+  }
+
+  function discs(c) {
+    let s = '';
+    for (let i = 0; i < 3; i++) {
+      const y = c[1] - i * (DB.dh + DB.gap), top = y - DB.dh, l = c[0] - DB.rx, r = c[0] + DB.rx;
+      s += `<path class="edge" fill="url(#dr-disc)" d="M${l} ${top} L${l} ${y} A${DB.rx} ${r1(RY)} 0 0 0 ${r} ${y} L${r} ${top} A${DB.rx} ${r1(RY)} 0 0 1 ${l} ${top} Z"/>`;
+      s += `<ellipse class="disc-top" cx="${c[0]}" cy="${top}" rx="${DB.rx}" ry="${r1(RY)}"/>`;
+    }
+    return s;
+  }
+  const topY = (c) => c[1] - 2 * (DB.dh + DB.gap) - DB.dh;
+
+  function product() {
+    const o = iso(P, -40, -4, 10);
+    const chart = [[10, 12], [22, 24], [34, 18], [46, 32], [58, 26], [70, 40]].map(([s, t]) => pp(o, EX, s, t));
+    const bars = [[12, 14], [22, 22], [32, 10]].map(([s, h]) =>
+      `<polygon class="uibar" points="${pts([pp(o, EX, s + 40, 6), pp(o, EX, s + 46, 6), pp(o, EX, s + 46, 6 + h), pp(o, EX, s + 40, 6 + h)])}"/>`).join('');
+    return g('class="node"', g('class="lift"',
+      `<polygon class="face face-l" points="${slab.left}"/>
+       <polygon class="face face-r" points="${slab.right}"/>
+       <polygon class="face" fill="url(#dr-top)" points="${slab.top}"/>
+       <polygon class="detail" points="${rhombus(P, 78, 78, 10)}"/>
+       <g class="float">
+         <polygon class="glass" points="${panel(o, EX, 80, 58)}"/>
+         <path class="detail" d="${pathOf([pp(o, EX, 8, 50), pp(o, EX, 36, 50)])}"/>
+         <path class="detail" d="${pathOf([pp(o, EX, 8, 44), pp(o, EX, 24, 44)])}"/>
+         <path class="uiline" d="${pathOf(chart.slice(0, 4))}"/>
+         ${bars}
+       </g>`));
+  }
+
+  function nextjs() {
+    return g('class="node"', g('class="lift"',
+      `<polygon class="face face-l" points="${next.left}"/>
+       <polygon class="face face-r" points="${next.right}"/>
+       <polygon class="face" fill="url(#dr-top)" points="${next.top}"/>
+       <polygon class="detail" points="${rhombus(N, 70, 70, 40)}"/>
+       <polygon class="detail" points="${rhombus(N, 46, 46, 40)}"/>
+       <polygon class="core" filter="url(#dr-glow)" points="${rhombus(N, 16, 16, 40)}"/>`));
+  }
+
+  function fastapi() {
+    let vents = '';
+    [.16, .24, .32, .4, .48, .56, .64, .72, .8].forEach((t) => { const p = lerp(api.L, api.B, t); vents += `<path class="vent" d="${pathOf([up(p, 12), up(p, 54)])}"/>`; });
+    [.2, .28, .36, .44, .52, .6, .68, .76, .84].forEach((t) => { const p = lerp(api.B, api.R, t); vents += `<path class="vent" d="${pathOf([up(p, 12), up(p, 54)])}"/>`; });
+    return g('class="node"', g('class="lift"',
+      `<polygon class="face face-l" points="${api.left}"/>
+       <polygon class="face face-r" points="${api.right}"/>
+       <polygon class="face" fill="url(#dr-top)" points="${api.top}"/>
+       ${vents}
+       <polygon class="detail" points="${rhombus(F, 70, 70, 72)}"/>
+       <polygon class="detail" points="${rhombus(F, 40, 40, 72)}"/>
+       <polygon class="core" filter="url(#dr-glow)" points="${rhombus(F, 18, 18, 72)}"/>`));
+  }
+
+  function mysql() {
+    const o = iso(M, -78, -6), dir = [-EX[0], -EX[1]];
+    let table = `<polygon class="glass" points="${panel(o, dir, 92, 76)}"/>`;
+    [12, 24, 36, 48].forEach((t) => { table += `<path class="row" d="${pathOf([pp(o, dir, 8, t), pp(o, dir, 84, t)])}"/>`; });
+    table += `<path class="detail" d="${pathOf([pp(o, dir, 8, 62), pp(o, dir, 84, 62)])}"/>`;
+    [32, 58].forEach((s) => { table += `<path class="col" d="${pathOf([pp(o, dir, s, 6), pp(o, dir, s, 68)])}"/>`; });
+    const ty = topY(M);
+    return g('class="node"',
+      `<ellipse class="pool" fill="url(#dr-pool)" cx="${M[0]}" cy="${M[1] + 6}" rx="84" ry="48"/>
+       <ellipse class="ring" cx="${M[0]}" cy="${M[1] + 6}" rx="76" ry="44"/>
+       ${table}
+       ${g('class="lift"', discs(M) +
+         `<ellipse class="detail" cx="${M[0]}" cy="${ty}" rx="${DB.rx * .64}" ry="${r1(RY * .64)}"/>` +
+         [-6, 0, 6].map((d) => `<path class="detail" d="${pathOf([[M[0] - 20, ty + d], [M[0] + 20, ty + d]])}"/>`).join(''))}`);
+  }
+
+  function clickhouse() {
+    const o = iso(C, 14, -80), dir = [-EY[0], -EY[1]];
+    let chart = `<polygon class="glass" points="${panel(o, dir, 100, 100)}"/>`;
+    [[12, 18], [26, 30], [40, 24], [54, 42], [68, 54], [82, 72]].forEach(([s, h]) => {
+      chart += `<polygon class="uibar" points="${pts([pp(o, dir, s, 6), pp(o, dir, s + 7, 6), pp(o, dir, s + 7, 6 + h), pp(o, dir, s, 6 + h)])}"/>`;
+    });
+    const line = [[8, 22], [28, 34], [46, 40], [62, 56], [80, 72], [94, 92]].map(([s, t]) => pp(o, dir, s, t));
+    chart += `<path class="uiline chart-line" pathLength="1" d="${pathOf(line)}"/>`;
+    chart += `<circle class="dot" cx="${r1(line[5][0])}" cy="${r1(line[5][1])}" r="2.8"/>`;
+    const ty = topY(C);
+    const bars = [[-26, 16], [-17, 26], [-8, 21], [1, 36], [10, 28], [19, 44], [28, 22]].map(([x, h], i) =>
+      `<rect class="bar" x="${C[0] + x - 2.6}" y="${r1(ty + 3 - h)}" width="5.2" height="${h}" rx="1" style="animation-delay:${(i * .17).toFixed(2)}s"/>`).join('');
+    return g('class="node"',
+      `<ellipse class="pool" fill="url(#dr-pool)" cx="${C[0]}" cy="${C[1] + 6}" rx="84" ry="48"/>
+       <ellipse class="ring" cx="${C[0]}" cy="${C[1] + 6}" rx="76" ry="44"/>
+       ${chart}
+       ${g('class="lift"', discs(C) + `<ellipse class="detail" cx="${C[0]}" cy="${ty}" rx="${DB.rx * .7}" ry="${r1(RY * .7)}"/>` + bars)}`);
+  }
+
+  function beam() {
+    const ty = topY(C);
+    const parts = [[-22, 0], [6, 1.1], [24, 2.2], [-8, 3], [16, .6], [-30, 1.8]]
+      .map(([x, d]) => `<circle class="particle" cx="${C[0] + x}" cy="${ty - 30}" r="1.5" style="animation-delay:${d}s"/>`).join('');
+    return `<g class="beam" aria-hidden="true"><rect x="${C[0] - 44}" y="${ty - 190}" width="88" height="200" fill="url(#dr-beam)"/>${parts}</g>`;
+  }
+
+  function connectors() {
+    let base = '', hi = '', pk = '', dots = '';
+    for (const [k, d] of Object.entries(PATHS)) {
+      base += `<path class="conn" data-path="${k}" d="${d}"/>`;
+      hi += `<path class="conn-hi" data-path="${k}" pathLength="1" d="${d}"/>`;
+      for (let i = 0; i < 2; i++) {
+        pk += `<circle class="pk" data-path="${k}" r="2.8" filter="url(#dr-glow)"><animateMotion dur="2.8s" begin="${i * 1.4}s" repeatCount="indefinite" path="${d}"/></circle>`;
+      }
+    }
+    // small node dots where connectors meet the databases (as in the reference)
+    dots += `<circle class="conn-dot" cx="${r1(iso(F, 0, 120)[0])}" cy="${r1(iso(F, 0, 120)[1])}" r="2.4"/>`;
+    dots += `<circle class="conn-dot" cx="${r1(iso(F, 120, 0)[0])}" cy="${r1(iso(F, 120, 0)[1])}" r="2.4"/>`;
+    return `<g aria-hidden="true">${base}${hi}${dots}${pk}</g>`;
+  }
+
+  function leader(x, y, text, key) {
+    return `<path class="leader" d="${pathOf([[x - 34, y], [x - 4, y]])}"/>
+            <circle class="leader-dot" cx="${x - 2}" cy="${y}" r="2.2"/>
+            <text class="lbl" ${key ? `data-for="${key}"` : ''} x="${x - 42}" y="${y + 5}" text-anchor="end">${text}</text>`;
+  }
+
+  const obj = (i, node, inner) => `<g class="obj" ${node ? `data-node="${node}"` : ''} style="--d:${150 + i * 120}ms">${inner}</g>`;
+
+  const svg = `
+    <defs>
+      <linearGradient id="dr-top" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#12423A"/><stop offset="1" stop-color="#0A2420"/></linearGradient>
+      <linearGradient id="dr-disc" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#061614"/><stop offset=".55" stop-color="#0F3D35"/><stop offset="1" stop-color="#061614"/></linearGradient>
+      <linearGradient id="dr-beam" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#21E9C8" stop-opacity="0"/><stop offset="1" stop-color="#21E9C8" stop-opacity=".22"/></linearGradient>
+      <radialGradient id="dr-pool" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#21E9C8" stop-opacity=".26"/><stop offset="1" stop-color="#21E9C8" stop-opacity="0"/></radialGradient>
+      <radialGradient id="dr-fade" cx=".5" cy=".6" r=".6"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+      <mask id="dr-fade-mask"><rect x="64" y="28" width="680" height="622" fill="url(#dr-fade)"/></mask>
+      <filter id="dr-glow" x="-100%" y="-100%" width="300%" height="300%">
+        <feGaussianBlur stdDeviation="2.4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    </defs>
+    ${floor()}
+    ${obj(4, null, beam())}
+    ${connectors()}
+    ${obj(0, 'product', product())}
+    ${obj(1, 'next', nextjs())}
+    ${obj(3, 'mysql', mysql())}
+    ${obj(4, 'clickhouse', clickhouse())}
+    ${obj(2, 'fastapi', fastapi())}
+    <g aria-hidden="true">
+      ${obj(0, null, leader(slab.L[0], slab.L[1] - 5, 'Product'))}
+      ${obj(1, null, leader(next.L[0], next.L[1] - 20, 'Next.js'))}
+      ${obj(2, null, leader(api.L[0] - 4, api.L[1] - 40, 'FastAPI', 'fastapi'))}
+      ${obj(3, null, `<text class="lbl" data-for="mysql" x="${M[0]}" y="${M[1] + 66}" text-anchor="middle">MySQL</text>
+                      <text class="lbl-sub" x="${M[0]}" y="${M[1] + 84}" text-anchor="middle">APP</text>`)}
+      ${obj(4, null, `<text class="lbl" data-for="clickhouse" x="${C[0]}" y="${C[1] + 66}" text-anchor="middle">ClickHouse</text>
+                      <text class="lbl-sub" x="${C[0]}" y="${C[1] + 84}" text-anchor="middle">ANALYTICS</text>`)}
+    </g>`;
+
+  const root = host.querySelector('#decision-rationale');
+  const diagram = host.querySelector('#dr-diagram');
+  diagram.innerHTML = svg;
+
+  /* ================= Interaction ================= */
+  const items = [...root.querySelectorAll('.item')];
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let locked = null;      // set by click/tap
+  let touched = false;    // user has interacted -> stop intro tour
+  let tourTimer = null;
+
+  function setFocus(key) {
+    if (key) root.dataset.focus = key; else delete root.dataset.focus;
+    items.forEach((b) => {
+      const on = b.dataset.key === key;
+      b.dataset.active = on;
+      b.setAttribute('aria-pressed', String(on));
+    });
+  }
+  function interact() { touched = true; clearTimeout(tourTimer); }
+
+  items.forEach((b) => {
+    const k = b.dataset.key;
+    b.addEventListener('mouseenter', () => { interact(); setFocus(k); });
+    b.addEventListener('mouseleave', () => setFocus(locked));
+    b.addEventListener('focus', () => { interact(); setFocus(k); });
+    b.addEventListener('blur', () => setFocus(locked));
+    b.addEventListener('click', () => { interact(); locked = locked === k ? null : k; setFocus(locked || k); });
+  });
+
+  diagram.querySelectorAll('[data-node="mysql"],[data-node="clickhouse"],[data-node="fastapi"]').forEach((n) => {
+    const k = n.dataset.node;
+    n.addEventListener('mouseenter', () => { interact(); setFocus(k); });
+    n.addEventListener('mouseleave', () => setFocus(locked));
+    n.addEventListener('click', () => { interact(); locked = locked === k ? null : k; setFocus(locked || k); });
+  });
+
+  /* A short guided tour after the section appears, then back to the resting state */
+  function tour() {
+    const seq = ['mysql', 'clickhouse', 'fastapi', null];
+    let i = 0;
+    const step = () => {
+      if (touched) return;
+      setFocus(seq[i]);
+      if (++i < seq.length) tourTimer = setTimeout(step, 2200);
+    };
+    tourTimer = setTimeout(step, 1500);
+  }
+
+  /* Entrance on scroll */
+  const io = new IntersectionObserver(([e]) => {
+    if (e.isIntersecting) {
+      root.classList.add('is-visible');
+      if (!reduced) tour();
+      io.disconnect();
+    }
+  }, { threshold: .3 });
+  io.observe(root);
+
+  /* Pointer parallax */
+  const wrap = root.querySelector('.diagram-wrap');
+  const tilt = root.querySelector('.tilt');
+  if (!reduced && matchMedia('(pointer: fine)').matches) {
+    let tx = 0, ty = 0, x = 0, y = 0, raf = 0;
+    const loop = () => {
+      x += (tx - x) * .08; y += (ty - y) * .08;
+      tilt.style.transform = `rotateX(${(-y * 6).toFixed(2)}deg) rotateY(${(x * 8).toFixed(2)}deg)`;
+      raf = (Math.abs(tx - x) > .001 || Math.abs(ty - y) > .001) ? requestAnimationFrame(loop) : 0;
+    };
+    const kick = () => { if (!raf) raf = requestAnimationFrame(loop); };
+    wrap.addEventListener('pointermove', (e) => {
+      const r = wrap.getBoundingClientRect();
+      tx = (e.clientX - r.left) / r.width - .5; ty = (e.clientY - r.top) / r.height - .5; kick();
+    });
+    wrap.addEventListener('pointerleave', () => { tx = 0; ty = 0; kick(); });
+  }
+})(document.getElementById("scope-decision"));
+
+/* ---- result ---- */
+(function (host) {
+  if (!host || host.dataset.init) return;
+  host.dataset.init = "1";
+/* ================= Data (design coordinates from the Figma frame) =================
+     value: the figure shown; its digits spin into place on reveal and on hover.  */
+  const UNITS = [
+    {
+      id: 'p95', value: '< 100', unit: 'ms', label: 'P95 analytics query time',
+      box: { x0: 70, y0: 270, w: 560, h: 230 },
+      metric: { x: 225, y: 279, w: 226, fs: 99, fu: 44, nh: 116 },
+      main: [[317, 380], [542, 380], [413, 467], [108, 467]],
+      under: [[305, 377], [550, 375], [395, 486], [82, 486]],
+      streaks: [[[544, 379], [622, 366]], [[548, 383], [614, 373]]],
+      d: 150, fd: 0, scan: 0,
+    },
+    {
+      id: 'speedup', value: '5', unit: '×', label: 'Speed-up vs. MySQL baseline',
+      box: { x0: 516, y0: 240, w: 401, h: 260 },
+      metric: { x: 559, y: 247, w: 273, fs: 143, fu: 62, nh: 166 },
+      main: [[627, 380], [757, 380], [849, 468], [535, 468]],
+      under: [[622, 383], [762, 383], [856, 490], [527, 490]],
+      streaks: [[[757, 380], [905, 366]], [[627, 380], [528, 368]]],
+      d: 0, fd: -1.6, scan: 1.8,
+    },
+    {
+      id: 'rows', value: '10M', unit: '+', label: 'Rows queried',
+      box: { x0: 812, y0: 270, w: 558, h: 230 },
+      metric: { x: 940, y: 280, w: 201, fs: 99, fu: 44, nh: 117 },
+      main: [[830, 379], [1035, 379], [1257, 468], [958, 468]],
+      under: [[826, 377], [1040, 377], [1287, 486], [967, 486]],
+      streaks: [[[830, 379], [814, 368]], [[1035, 379], [1060, 370]]],
+      d: 300, fd: -3.2, scan: 3.6,
+    },
+  ];
+
+  const pts = (a) => a.map((p) => p.join(',')).join(' ');
+  const mount = host.querySelector('#res-units');
+
+  UNITS.forEach((u) => {
+    const { x0, y0, w, h } = u.box;
+    const [TL, TR, BR, BL] = u.main;
+    const m = u.metric;
+    const clipId = `res-clip-${u.id}`;
+    // beam: from the platform's top edge up to the top of the number
+    const beam = pts([[TL[0] + 8, TL[1]], [TR[0] - 8, TR[1]], [m.x + m.w - 6, m.y + 6], [m.x + 6, m.y + 6]]);
+
+    const el = document.createElement('div');
+    el.className = 'unit';
+    el.tabIndex = 0;
+    el.dataset.id = u.id;
+    el.setAttribute('aria-label', `${u.value}${u.unit} — ${u.label}`);
+    el.style.cssText = `--x0:${x0};--y0:${y0};--w:${w};--h:${h};--d:${u.d}ms;--fd:${u.fd}s;--scan:${u.scan}s`;
+    el.innerHTML = `
+      <svg class="plat" viewBox="${x0} ${y0} ${w} ${h}" aria-hidden="true">
+        <defs><clipPath id="${clipId}"><polygon points="${pts(u.main)}"/></clipPath></defs>
+        <polygon class="plat__beam" points="${beam}" fill="url(#res-beam)"/>
+        <g class="plat__body">
+          <polygon class="plat__under" points="${pts(u.under)}"/>
+          ${u.streaks.map(([a, b]) => `<line class="plat__streak" x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}"/>`).join('')}
+          <polygon class="plat__fill" points="${pts(u.main)}" fill="url(#res-fill)"/>
+          <g clip-path="url(#${clipId})"><rect class="plat__scan" x="${x0}" y="${y0}" width="160" height="${h}" fill="url(#res-scan)"/></g>
+          <polygon class="plat__edge" points="${pts(u.main)}"/>
+          <path class="plat__front" pathLength="1" d="M${BL[0]} ${BL[1]} L${BR[0]} ${BR[1]}"/>
+        </g>
+        <polygon class="plat__hit" points="${pts(u.under)}"/>
+      </svg>
+      <div class="metric" style="--mx:${m.x};--my:${m.y};--mw:${m.w}">
+        <div class="metric__lift">
+          <div class="metric__float">
+            <div class="metric__row">
+              <span class="metric__num grad" style="--fs:${m.fs};--nh:${m.nh}" data-value="${u.value}">${u.value}</span>
+              <span class="metric__unit grad" style="--fu:${m.fu}">${u.unit}</span>
+            </div>
+            <p class="metric__label">${u.label}</p>
+          </div>
+        </div>
+      </div>`;
+    mount.appendChild(el);
+  });
+
+  /* ================= Behaviour ================= */
+  const root = host.querySelector('#the-result');
+  const units = [...root.querySelectorAll('.unit')];
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* Slot-machine scramble: digits spin, then settle on the real value */
+  function scramble(span, ms) {
+    const target = span.dataset.value;
+    if (reduced || !/\d/.test(target)) { span.textContent = target; return; }
+    const start = performance.now();
+    const tick = (now) => {
+      const t = Math.min(1, (now - start) / ms);
+      let i = 0;
+      const settled = Math.floor(t * target.replace(/\D/g, '').length + .0001);
+      span.textContent = target.replace(/\d/g, (d) => (i++ < settled || t === 1 ? d : String((Math.random() * 10) | 0)));
+      if (t < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
+
+  let locked = null;
+  function setActive(id) {
+    if (id) root.dataset.active = id; else delete root.dataset.active;
+    units.forEach((u) => u.classList.toggle('is-active', u.dataset.id === id));
+  }
+  units.forEach((u) => {
+    const id = u.dataset.id;
+    const num = u.querySelector('.metric__num');
+    const enter = () => { if (root.dataset.active !== id) scramble(num, 420); setActive(id); };
+    u.querySelectorAll('.plat__hit, .metric').forEach((t) => {
+      t.addEventListener('mouseenter', enter);
+      t.addEventListener('mouseleave', () => setActive(locked));
+      t.addEventListener('click', () => { locked = locked === id ? null : id; setActive(locked || id); });
+    });
+    u.addEventListener('focus', enter);
+    u.addEventListener('blur', () => setActive(locked));
+  });
+
+  /* Entrance on scroll */
+  const io = new IntersectionObserver(([e]) => {
+    if (!e.isIntersecting) return;
+    root.classList.add('is-visible');
+    units.forEach((u, i) => setTimeout(() => scramble(u.querySelector('.metric__num'), 1100), 450 + [150, 0, 300][i]));
+    setTimeout(() => root.classList.add('is-ready'), reduced ? 0 : 2200);
+    io.disconnect();
+  }, { threshold: .35 });
+  io.observe(root);
+
+  /* Pointer parallax: platforms tilt in 3D, numbers drift a little further */
+  const stage = root.querySelector('.res__stage');
+  const tilt = root.querySelector('.res__tilt');
+  const metrics = [...root.querySelectorAll('.metric')];
+  if (!reduced && matchMedia('(pointer: fine)').matches) {
+    let tx = 0, ty = 0, x = 0, y = 0, raf = 0;
+    const loop = () => {
+      x += (tx - x) * .07; y += (ty - y) * .07;
+      tilt.style.transform = `rotateX(${(-y * 5).toFixed(2)}deg) rotateY(${(x * 6).toFixed(2)}deg)`;
+      metrics.forEach((m) => { m.style.transform = `translate(${(x * 8).toFixed(1)}px, ${(y * 5).toFixed(1)}px)`; });
+      raf = (Math.abs(tx - x) + Math.abs(ty - y) > .002) ? requestAnimationFrame(loop) : 0;
+    };
+    const kick = () => { if (!raf) raf = requestAnimationFrame(loop); };
+    root.addEventListener('pointermove', (e) => {
+      const r = stage.getBoundingClientRect();
+      tx = Math.max(-1, Math.min(1, ((e.clientX - r.left) / r.width - .5) * 2));
+      ty = Math.max(-1, Math.min(1, ((e.clientY - r.top) / r.height - .5) * 2));
+      kick();
+    });
+    root.addEventListener('pointerleave', () => { tx = 0; ty = 0; kick(); });
+  }
+})(document.getElementById("scope-result"));
+
+/* ---- retrospect ---- */
+(function (host) {
+  if (!host || host.dataset.init) return;
+  host.dataset.init = "1";
+const root = host.querySelector('#in-retrospect');
+  const stage = root.querySelector('.rt__stage');
+  const glow = root.querySelector('.rt__glow');
+  const qs = [...root.querySelectorAll('.q')];
+  const layers = [...root.querySelectorAll('.rt__art .layer')];
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let locked = null;
+
+  /* Questions: hover / focus / tap fills the grey loop step by step */
+  function setQ(n) {
+    if (n) root.dataset.q = n; else delete root.dataset.q;
+    qs.forEach((q) => q.classList.toggle('is-active', q.dataset.q === String(n)));
+  }
+  qs.forEach((q) => {
+    const n = q.dataset.q;
+    q.addEventListener('mouseenter', () => setQ(n));
+    q.addEventListener('mouseleave', () => setQ(locked));
+    q.addEventListener('focus', () => setQ(n));
+    q.addEventListener('blur', () => setQ(locked));
+    q.addEventListener('click', () => { locked = locked === n ? null : n; setQ(locked || n); });
+    q.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { (qs[qs.indexOf(q) + 1] || qs[0]).focus(); e.preventDefault(); }
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { (qs[qs.indexOf(q) - 1] || qs[qs.length - 1]).focus(); e.preventDefault(); }
+    });
+  });
+
+  /* Entrance on scroll */
+  const io = new IntersectionObserver(([e]) => {
+    if (!e.isIntersecting) return;
+    root.classList.add('is-visible');
+    setTimeout(() => root.classList.add('is-ready'), reduced ? 0 : 2300);
+    io.disconnect();
+  }, { threshold: .3 });
+  io.observe(root);
+
+  /* Pointer: soft glow follows the cursor, loops and droplets drift in depth */
+  if (!reduced && matchMedia('(pointer: fine)').matches) {
+    let tx = 0, ty = 0, x = 0, y = 0, gx = 0, gy = 0, tgx = 0, tgy = 0, raf = 0;
+    const loop = () => {
+      x += (tx - x) * .07; y += (ty - y) * .07;
+      gx += (tgx - gx) * .18; gy += (tgy - gy) * .18;
+      layers.forEach((l) => {
+        const d = +l.dataset.depth;
+        l.style.transform = `translate(${(-x * d).toFixed(2)}px, ${(-y * d).toFixed(2)}px)`;
+      });
+      glow.style.transform = `translate(${gx.toFixed(1)}px, ${gy.toFixed(1)}px)`;
+      const moving = Math.abs(tx - x) + Math.abs(ty - y) + Math.abs(tgx - gx) + Math.abs(tgy - gy) > .05;
+      raf = moving ? requestAnimationFrame(loop) : 0;
+    };
+    const kick = () => { if (!raf) raf = requestAnimationFrame(loop); };
+    stage.addEventListener('pointermove', (e) => {
+      const r = stage.getBoundingClientRect();
+      tx = ((e.clientX - r.left) / r.width - .5) * 2;
+      ty = ((e.clientY - r.top) / r.height - .5) * 2;
+      tgx = e.clientX - r.left; tgy = e.clientY - r.top;
+      kick();
+    });
+    stage.addEventListener('pointerleave', () => { tx = 0; ty = 0; kick(); });
+  }
+})(document.getElementById("scope-retrospect"));
+
+/* ---- footer ---- */
+(function (host) {
+  if (!host || host.dataset.init) return;
+  host.dataset.init = "1";
+const root = host.querySelector('#site-footer');
+[...root.querySelectorAll('.ft__btn, .ft__copy, .ft__top')].forEach((el, i) => el.style.setProperty('--d', `${i * 70}ms`));
+const io = new IntersectionObserver(([e]) => {
+  if (!e.isIntersecting) return;
+  root.classList.add('is-in');
+  io.disconnect();
+}, { threshold: .2 });
+io.observe(root);
+root.querySelector('.ft__top').addEventListener('click', () => {
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
+});
+})(document.getElementById("scope-footer"));
+</script>
+</body>
+</html>

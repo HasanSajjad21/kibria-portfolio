@@ -1,0 +1,46 @@
+/* ================= SECTION RAIL (fixed right nav) ================= */
+/* nav rail — 52×340, labels appear only on hover / keyboard focus */
+.rail{position:fixed;z-index:20;right:2.85vw;top:calc(24.35vw - 170px);width:52px;height:340px;box-sizing:border-box;padding:7px;
+  border:1px solid rgba(255,255,255,.12);border-radius:16px;background:rgba(18,18,20,.4);display:flex;flex-direction:column;align-items:center;gap:12px}
+.rail button{all:unset;position:relative;cursor:pointer;width:36px;height:36px;flex:none;border-radius:8px;display:grid;place-items:center;color:#9F9F9F;
+  background:transparent;transition:background-color .22s cubic-bezier(.2,.7,.2,1),color .22s cubic-bezier(.2,.7,.2,1)}
+.rail button svg{width:16px;height:16px;display:block}
+.rail button.on{color:#1DF9D4}
+.rail button:hover,.rail button:focus-visible{background:rgba(255,255,255,.04);color:var(--cyan)}
+.rail .nav-label{position:absolute;right:calc(100% + 24px);top:50%;display:flex;align-items:center;gap:8px;white-space:nowrap;pointer-events:none;
+  font:400 16px/16px var(--font-oswald),"Arial Narrow",sans-serif;letter-spacing:.96px;color:var(--cyan);
+  opacity:0;transform:translate(6px,-50%);transition:opacity .22s cubic-bezier(.2,.7,.2,1),transform .22s cubic-bezier(.2,.7,.2,1)}
+.rail .nav-label i{display:block;width:30px;height:1px;background:var(--cyan);transform:scaleX(0);transform-origin:right;transition:transform .22s cubic-bezier(.2,.7,.2,1)}
+.rail button:hover .nav-label,.rail button:focus-visible .nav-label{opacity:1;transform:translate(0,-50%)}
+.rail button:hover .nav-label i,.rail button:focus-visible .nav-label i{transform:scaleX(1)}
+/* only the hovered item ever shows its label */
+.rail:hover button:not(:hover) .nav-label{opacity:0;transform:translate(6px,-50%)}
+.rail:hover button:not(:hover) .nav-label i{transform:scaleX(0)}
+.rail:hover button:not(:hover){background:transparent}
+.rail:hover button:not(:hover):not(.on){color:#9F9F9F}
+.rail:hover button.on:not(:hover){color:#1DF9D4}
+.rail.play{animation:slideL 1s var(--ease-out) 1.25s both}
+.rail.play button{animation:iconIn .55s var(--ease-out) both}
+.rail.play button:nth-child(1){animation-delay:1.45s}
+.rail.play button:nth-child(2){animation-delay:1.51s}
+.rail.play button:nth-child(3){animation-delay:1.57s}
+.rail.play button:nth-child(4){animation-delay:1.63s}
+.rail.play button:nth-child(5){animation-delay:1.69s}
+.rail.play button:nth-child(6){animation-delay:1.75s}
+.rail.play button:nth-child(7){animation-delay:1.81s}
+.replay{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:5;font:500 12px/1 var(--body);letter-spacing:.06em;text-transform:uppercase;
+  color:var(--text);background:rgba(19,19,19,.7);border:1px solid var(--line);border-radius:99px;padding:10px 14px;cursor:pointer;backdrop-filter:blur(6px)}
+.replay:hover{border-color:var(--green);color:var(--green)}
+.replay:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+/* steps aside while the footer is on screen, so it never covers "back to top" */
+.replay{transition:opacity .3s ease}
+.replay.ft-hide{opacity:0;pointer-events:none}
+
+@keyframes slideL{from{opacity:0;transform:translateX(3vw)}to{opacity:1;transform:none}}
+@keyframes iconIn{from{opacity:0;transform:translateY(.8vw) scale(.7)}to{opacity:1;transform:none}}
+@media (max-width:760px){
+  .rail{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .rail.play,.rail.play button{animation-duration:.01ms!important;animation-delay:0s!important;animation-iteration-count:1!important}
+}

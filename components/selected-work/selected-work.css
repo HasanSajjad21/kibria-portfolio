@@ -1,0 +1,89 @@
+/* ================= SELECTED WORK =================
+   The header sits in normal flow; below it a tall track pins the card stack to the viewport.
+   The stack is the Figma 1140×596 card plus the cards peeking behind it, scaled as large as
+   the screen allows. Scroll sends the front card up and toward the viewer like a page being
+   flipped off a notepad, and the card behind comes forward into its place. */
+.sw{position:relative;isolation:isolate;background:transparent;overflow-x:clip}  /* sits on the shared #141414 ground so the experience glow carries across */
+.sw-head{position:absolute;left:0;right:0;top:var(--ht,80px);padding:0 16px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.sw-eyebrow{margin:0;font:400 16px/28px var(--font-inter),system-ui,sans-serif;letter-spacing:.13em;text-transform:uppercase;color:#1DF9D4}
+.sw-title{margin:0;font:400 clamp(40px,4.86vw,70px)/1.25 var(--font-oswald),"Arial Narrow",sans-serif;letter-spacing:-.025em;color:#fff;white-space:nowrap;overflow:hidden;padding-bottom:.02em}
+.sw-track{position:relative;height:calc(100vh + 2 * var(--flip, 95vh) + 30vh)}
+.sw-pin{position:sticky;top:0;height:100vh;overflow-x:clip;overflow-y:visible}  /* glows can bleed up into the header */
+.sw-stage{position:absolute;left:50%;top:var(--st,240px);width:1140px;height:596px;transform-origin:50% 0;
+  transform:translateX(-50%) scale(var(--sc,1))}
+/* background glows from the Figma frame (soft teal light), placed relative to the front card */
+.sw-bg{position:absolute;border-radius:50%;pointer-events:none;z-index:-1;will-change:transform}
+.sw-bg.b1{left:734px;top:-272px;width:488px;height:488px;background:radial-gradient(closest-side,rgba(29,249,212,0.083),rgba(29,249,212,0.073) 20%,rgba(29,249,212,0.050) 40%,rgba(29,249,212,0.025) 60%,rgba(29,249,212,0.007) 80%,rgba(29,249,212,0));animation:xpOrb1 26s ease-in-out infinite}
+.sw-bg.b2{left:-62px;top:41px;width:488px;height:488px;background:radial-gradient(closest-side,rgba(29,249,212,0.083),rgba(29,249,212,0.073) 20%,rgba(29,249,212,0.050) 40%,rgba(29,249,212,0.025) 60%,rgba(29,249,212,0.007) 80%,rgba(29,249,212,0));animation:xpOrb2 32s ease-in-out infinite}
+.sw-bg.b3{left:-335px;top:143px;width:560px;height:546px;background:radial-gradient(closest-side,rgba(29,249,212,0.127),rgba(29,249,212,0.111) 20%,rgba(29,249,212,0.076) 40%,rgba(29,249,212,0.038) 60%,rgba(29,249,212,0.010) 80%,rgba(29,249,212,0));animation:xpOrb3 22s ease-in-out infinite}
+.sw-title span{display:inline-block}
+.sw-stack{position:absolute;inset:0;perspective:1600px;perspective-origin:50% 35%}
+.sw-card{position:absolute;inset:0;transform-origin:50% 0;will-change:transform,opacity;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.sw-face{position:absolute;inset:0;border-radius:24px;overflow:hidden;box-shadow:0 28px 60px -24px rgba(0,0,0,.55)}
+.sw-face::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:#000;opacity:var(--dim,0)}
+.sw-uh .sw-face{background:linear-gradient(68.69deg,#141414 8.38%,#033736 80.99%,#033736 110.86%)}
+.sw-ie .sw-face{background:linear-gradient(68.69deg,#17131E 8.38%,#301E5C 80.99%,#301E5C 110.86%)}
+.sw-ed .sw-face{background:linear-gradient(68.69deg,#0D1316 8.38%,#063859 80.99%,#0A446A 110.86%)}
+.sw-glow{position:absolute;border-radius:50%;filter:blur(60px);pointer-events:none}
+.sw-uh .sw-glow{left:432px;top:137px;width:459px;height:402px;background:rgba(32,128,118,.42)}
+.sw-ie .sw-glow{left:520px;top:188px;width:567px;height:404px;background:rgba(110,72,206,.32)}
+.sw-ed .sw-glow{left:558px;top:71px;width:482px;height:441px;background:rgba(36,118,178,.38)}
+.sw-img{position:absolute;display:block;max-width:none;pointer-events:none;user-select:none}
+.sw-copy{position:absolute;left:55px;top:50%;transform:translateY(-50%);width:424px;display:flex;flex-direction:column;align-items:flex-start;gap:56px}
+.sw-ie .sw-copy{width:480px}
+.sw-ed .sw-copy{left:60px;width:431px}
+.sw-top{display:flex;flex-direction:column;gap:48px;width:100%}
+.sw-brand{display:flex;align-items:center;gap:12px;font:600 28px/25px var(--font-oswald),"Arial Narrow",sans-serif;color:#F3F4F4;margin:0}
+.sw-brand img{display:block}
+.sw-text{display:flex;flex-direction:column;gap:12px}
+.sw-h{margin:0;font:400 40px/1.3 var(--font-oswald),"Arial Narrow",sans-serif;color:#fff;text-transform:capitalize}
+.sw-h em{font-style:normal}
+.sw-uh .sw-h em{color:#7FF8F5}.sw-ie .sw-h em{color:#C0A7FF}.sw-ed .sw-h em{color:#63C1FF}
+.sw-p{margin:0;font:300 16px/1.5 var(--font-inter),system-ui,sans-serif;letter-spacing:-.16px;color:#F1F1F1;max-width:480px}
+.sw-uh .sw-p{width:400px}
+.sw-btn{display:inline-flex;align-items:center;gap:12px;padding:12px 31px;border:1px solid #7B7B7B;border-radius:100px;color:#F1F1F1;
+  font:500 18px/normal var(--font-inter),system-ui,sans-serif;text-decoration:none;transition:border-color .3s}
+.sw-btn svg{width:28px;height:28px;display:block}
+.sw-btn svg rect{fill:#E0E0E0;transition:fill .3s}
+.sw-btn:hover{border-color:#1DF9D4}.sw-btn:hover svg rect{fill:#1DF9D4}
+.sw-btn:focus-visible{outline:2px solid #1DF9D4;outline-offset:4px}
+
+/* entrance, consistent with the hero and experience headers */
+.sw.pre .sw-eyebrow,.sw.pre .sw-face,.sw.pre .sw.pre .sw-title span{transform:translateY(105%)}
+.sw.in .sw-eyebrow{animation:track 1.1s var(--ease-out) both}
+.sw.in .sw-title span{animation:rise 1.05s var(--ease-out) .15s both}
+.sw.in .sw-face{animation:swIn 1s var(--ease-out) both}
+.sw.in .sw-ed .sw-face{animation-delay:.45s}
+.sw.in .sw-ie .sw-face{animation-delay:.57s}
+.sw.in .sw-uh .sw-face{animation-delay:.69s}
+
+@media (max-width:760px){
+  .sw{--flip:80vh}
+  .sw-head{gap:6px}
+  .sw-title{font-size:36px;line-height:1.2;letter-spacing:-1px;white-space:normal}
+  .sw-stage{left:16px;right:16px;width:auto;height:var(--sh,520px);transform:none}
+  .sw-stack{perspective:1200px}
+  .sw-bg{display:none}
+  .sw-face{border-radius:18px}
+  .sw-copy{left:22px;right:22px;top:24px;transform:none;width:auto!important;gap:20px}
+  .sw-ed .sw-copy{left:22px}
+  .sw-top{gap:18px}
+  .sw-brand{font-size:20px;line-height:22px;gap:10px}
+  .sw-brand img{width:auto;height:30px}
+  .sw-h{font-size:26px}
+  .sw-p{font-size:14px;width:auto!important}
+  .sw-btn{font-size:15px;padding:9px 20px;gap:10px}
+  .sw-btn svg{width:24px;height:24px}
+  .sw-img{transform-origin:0 0}
+  .sw-uh .sw-img.m1{left:2%!important;top:auto!important;bottom:-4%;width:116%!important;height:auto!important}
+  .sw-ie .sw-img.m1{left:8%!important;top:auto!important;bottom:-22%;width:104%!important;height:auto!important}
+  .sw-ed .sw-img.m1{left:20%!important;top:auto!important;bottom:-8%;width:104%!important;height:auto!important}
+  .sw-ed .sw-img.m2{left:-4%!important;top:auto!important;bottom:-14%;width:82%!important;height:auto!important}
+  .sw-ed .sw-img.sp{display:none}
+  .sw-glow{left:20%!important;top:auto!important;bottom:-10%;width:80%!important;height:55%!important}
+}
+@media (max-width:760px) and (max-height:620px){ .sw-p{display:none} }
+@media (prefers-reduced-motion:reduce){
+  .sw.in *{animation-duration:.01ms!important;animation-delay:0s!important}
+  .sw-bg{animation:none!important}
+}
